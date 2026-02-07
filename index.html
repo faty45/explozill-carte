@@ -462,17 +462,10 @@ document.getElementById('panel-close').addEventListener('click', function() {
     showNextButton();
 });
 
-// === RÉCEPTION DES DONNÉES DEPUIS PANDASUITE ===
-PandaBridge.listen(function(event) {
-    if (event && event.data) {
-        loadParcours(event.data);
-    }
-});
-
-// Aussi écouter via les propriétés
-PandaBridge.listen('props', function(props) {
-    if (props && props.parcours) {
-        loadParcours(props.parcours);
+// === RÉCEPTION DES DONNÉES DEPUIS PANDASUITE VIA MARKER ===
+PandaBridge.listen("marker18646", function(args) {
+    if (args && args[0]) {
+        loadParcours(args[0]);
     }
 });
 
