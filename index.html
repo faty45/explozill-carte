@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Explozill - Carte</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pandasuite-bridge/lib/pandasuite-bridge.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        #map { width: 100%; height: 100%; z-index: 1; }
+
+        /* Panneau d'étape */
+        #panel {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-height: 55%;
+            overflow-y: auto;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+        #panel.visible { display: block; }
+        #panel-handle {
+            width: 40px; height: 4px;
+            background: #ccc; border-radius: 2px;
+            margin: 0 auto 15px;
+        }
+        #panel-titre {
+            font-size: 16px; font-weight: 700;
+            color: #1a1a2e; margin-bottom: 8px;
+        }
+        #panel-narration {
+            font-size: 13px; color: #555;
+            line-height: 1.5; margin-bottom: 15px;
+            font-style: italic;
+        }
+        #panel-interaction {
+            background: #f0f4ff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        #panel-interaction-type {
+            font-size: 11px; font-weight: 600;
+            color: #667eea; text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        #panel-interaction-content {
+            font-size: 14px; color: #333;
+            line-height: 1.5;
+        }
+        .quiz-btn {
+            display: block; width: 100%;
+            padding: 12px; margin: 6px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            font-size: 14px; color: #333;
+            text-align: left;
+            cursor: pointer;
+        }
+        .quiz-btn:active { background: #f0f4ff; border-color: #667eea; }
+        .quiz-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .quiz-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+
+        #btn-valider {
+            display: none;
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none;
+            border-radius: 12px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer;
+        }
+        #panel-points {
+            text-align: center;
+            font-size: 13px; color: #667eea;
+            font-weight: 600; margin-top: 10px;
+        }
+        #panel-close {
+            position: absolute; top: 15px; right: 15px;
+            background: none; border: none;
+            font-size: 20px; color: #999; cursor: pointer;
+        }
+
+        /* Score flottant */
+        #score-badge {
+            position: fixed; top: 15px; right: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 8px 15px;
+            border-radius: 20px; z-index: 1000;
+            font-size: 13px; font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Bouton étape suivante */
+        #btn-next {
+            display: none;
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none;
+            border-radius: 12px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; z-index: 999;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+        }
+
+        /* Message de fin */
+        #conclusion-panel {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        #conclusion-panel.visible { display: flex; }
+        #conclusion-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            text-align: center;
+            max-width: 350px;
+        }
+        #conclusion-content h2 {
+            font-size: 20px; color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+        #conclusion-content p {
+            font-size: 14px; color: #555;
+            line-height: 1.6; margin-bottom: 20px;
+        }
+        #conclusion-score {
+            font-size: 28px; font-weight: 700;
+            color: #667eea; margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="score-badge">🦊 Score : <span id="score-value">0</span> pts</div>
+
+<div id="panel">
+    <button id="panel-close">&times;</button>
+    <div id="panel-handle"></div>
+    <div id="panel-titre"></div>
+    <div id="panel-narration"></div>
+    <div id="panel-interaction">
+        <div id="panel-interaction-type"></div>
+        <div id="panel-interaction-content"></div>
+    </div>
+    <button id="btn-valider">Valider</button>
+    <div id="panel-points"></div>
+</div>
+
+<button id="btn-next">Étape suivante →</button>
+
+<div id="conclusion-panel">
+    <div id="conclusion-content">
+        <h2>🦊 Parcours terminé !</h2>
+        <div id="conclusion-score"></div>
+        <p id="conclusion-text"></p>
+    </div>
+</div>
+
+<script>
+// === VARIABLES GLOBALES ===
+var map, parcours, markers = [], polyline;
+var currentStep = 0;
+var score = 0;
+var stepCompleted = false;
+
+// === INITIALISER LA CARTE ===
+map = L.map('map', {
+    zoomControl: false,
+    attributionControl: false
+}).setView([47.9029, 1.9039], 14);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+}).addTo(map);
+
+// === ICÔNES PERSONNALISÉES ===
+function createStepIcon(num, active) {
+    return L.divIcon({
+        className: 'custom-marker',
+        html: '<div style="width:36px;height:36px;border-radius:50%;background:'
+            + (active ? 'linear-gradient(135deg,#667eea,#764ba2)' : '#ccc')
+            + ';color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:3px solid white;">'
+            + num + '</div>',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+}
+
+function createCompletedIcon(num) {
+    return L.divIcon({
+        className: 'custom-marker',
+        html: '<div style="width:36px;height:36px;border-radius:50%;background:#28a745;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:3px solid white;">✓</div>',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+}
+
+// === CHARGER LE PARCOURS ===
+function loadParcours(data) {
+    // Si c'est une string, parser le JSON
+    if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch(e) { return; }
+    }
+
+    parcours = data;
+    currentStep = 0;
+    score = 0;
+    document.getElementById('score-value').textContent = '0';
+
+    // Supprimer anciens marqueurs
+    markers.forEach(function(m) { map.removeLayer(m); });
+    markers = [];
+    if (polyline) map.removeLayer(polyline);
+
+    // Créer les marqueurs
+    var latlngs = [];
+    parcours.etapes.forEach(function(etape, i) {
+        var ll = [etape.latitude, etape.longitude];
+        latlngs.push(ll);
+
+        var marker = L.marker(ll, {
+            icon: createStepIcon(i + 1, i === 0)
+        }).addTo(map);
+
+        marker.on('click', function() {
+            if (i === currentStep) {
+                showPanel(i);
+            }
+        });
+
+        markers.push(marker);
+    });
+
+    // Tracer le parcours
+    polyline = L.polyline(latlngs, {
+        color: '#667eea',
+        weight: 3,
+        opacity: 0.6,
+        dashArray: '10, 10'
+    }).addTo(map);
+
+    // Centrer la carte
+    map.fitBounds(L.latLngBounds(latlngs).pad(0.2));
+
+    // Afficher le premier marqueur comme actif
+    showNextButton();
+}
+
+// === AFFICHER LE PANNEAU D'ÉTAPE ===
+function showPanel(stepIndex) {
+    var etape = parcours.etapes[stepIndex];
+    var panel = document.getElementById('panel');
+
+    document.getElementById('panel-titre').textContent = etape.ordre + '. ' + etape.lieu_nom;
+    document.getElementById('panel-narration').textContent = etape.narration_arrivee;
+
+    var typeDiv = document.getElementById('panel-interaction-type');
+    var contentDiv = document.getElementById('panel-interaction-content');
+    var btnValider = document.getElementById('btn-valider');
+
+    stepCompleted = false;
+    btnValider.style.display = 'none';
+    document.getElementById('panel-points').textContent = '';
+
+    var interaction = etape.interaction;
+    typeDiv.textContent = interaction.type_interaction.toUpperCase();
+
+    // Générer le contenu selon le type
+    switch(interaction.type_interaction) {
+        case 'quiz':
+            var html = '<p style="margin-bottom:12px;font-weight:600;">' + interaction.question + '</p>';
+            interaction.reponses.forEach(function(rep, i) {
+                html += '<button class="quiz-btn" data-index="' + i + '" data-correct="' + interaction.bonne_reponse + '">' + rep + '</button>';
+            });
+            if (interaction.indice) {
+                html += '<p style="margin-top:10px;font-size:11px;color:#999;">💡 Indice : ' + interaction.indice + '</p>';
+            }
+            contentDiv.innerHTML = html;
+
+            // Événements quiz
+            contentDiv.querySelectorAll('.quiz-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    if (stepCompleted) return;
+                    var idx = parseInt(this.getAttribute('data-index'));
+                    var correct = parseInt(this.getAttribute('data-correct'));
+                    stepCompleted = true;
+
+                    if (idx === correct) {
+                        this.classList.add('correct');
+                        score += etape.points;
+                        document.getElementById('score-value').textContent = score;
+                        document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + etape.narration_reussite;
+                    } else {
+                        this.classList.add('wrong');
+                        contentDiv.querySelectorAll('.quiz-btn')[correct].classList.add('correct');
+                        document.getElementById('panel-points').textContent = etape.narration_echec;
+                    }
+                    completeStep(stepIndex);
+                });
+            });
+            break;
+
+        case 'photo':
+            contentDiv.innerHTML = '<p style="font-weight:600;">' + interaction.consigne + '</p>'
+                + (interaction.indice ? '<p style="margin-top:10px;font-size:11px;color:#999;">💡 ' + interaction.indice + '</p>' : '');
+            btnValider.style.display = 'block';
+            btnValider.textContent = '📸 Photo prise !';
+            btnValider.onclick = function() {
+                if (stepCompleted) return;
+                stepCompleted = true;
+                score += etape.points;
+                document.getElementById('score-value').textContent = score;
+                document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + etape.narration_reussite;
+                completeStep(stepIndex);
+            };
+            break;
+
+        case 'observation':
+            contentDiv.innerHTML = '<p style="font-weight:600;">' + interaction.consigne + '</p>'
+                + '<input type="number" id="obs-input" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px;margin-top:10px;" placeholder="Votre réponse...">'
+                + (interaction.indice ? '<p style="margin-top:10px;font-size:11px;color:#999;">💡 ' + interaction.indice + '</p>' : '');
+            btnValider.style.display = 'block';
+            btnValider.textContent = 'Valider ma réponse';
+            btnValider.onclick = function() {
+                if (stepCompleted) return;
+                var val = parseInt(document.getElementById('obs-input').value);
+                var correct = interaction.bonne_reponse;
+                var marge = interaction.marge_erreur || 0;
+                stepCompleted = true;
+
+                if (Math.abs(val - correct) <= marge) {
+                    score += etape.points;
+                    document.getElementById('score-value').textContent = score;
+                    document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + etape.narration_reussite;
+                } else {
+                    document.getElementById('panel-points').textContent = etape.narration_echec;
+                }
+                completeStep(stepIndex);
+            };
+            break;
+
+        case 'code':
+            contentDiv.innerHTML = '<p style="font-weight:600;">' + interaction.consigne + '</p>'
+                + '<input type="text" id="code-input" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px;margin-top:10px;" placeholder="Entrez le code...">'
+                + (interaction.indice ? '<p style="margin-top:10px;font-size:11px;color:#999;">💡 ' + interaction.indice + '</p>' : '');
+            btnValider.style.display = 'block';
+            btnValider.textContent = 'Valider le code';
+            btnValider.onclick = function() {
+                if (stepCompleted) return;
+                var val = document.getElementById('code-input').value.trim().toUpperCase();
+                var correct = interaction.bonne_reponse.toUpperCase().replace(/-/g, '');
+                stepCompleted = true;
+
+                if (val.replace(/-/g, '') === correct || val === interaction.bonne_reponse.toUpperCase()) {
+                    score += etape.points;
+                    document.getElementById('score-value').textContent = score;
+                    document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + etape.narration_reussite;
+                } else {
+                    document.getElementById('panel-points').textContent = etape.narration_echec;
+                }
+                completeStep(stepIndex);
+            };
+            break;
+
+        default:
+            contentDiv.innerHTML = '<p style="font-weight:600;">' + (interaction.consigne || interaction.question || 'Réalisez le défi !') + '</p>';
+            btnValider.style.display = 'block';
+            btnValider.textContent = 'Défi réalisé ✓';
+            btnValider.onclick = function() {
+                if (stepCompleted) return;
+                stepCompleted = true;
+                score += etape.points;
+                document.getElementById('score-value').textContent = score;
+                document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + etape.narration_reussite;
+                completeStep(stepIndex);
+            };
+    }
+
+    panel.classList.add('visible');
+    document.getElementById('btn-next').style.display = 'none';
+}
+
+// === COMPLÉTER UNE ÉTAPE ===
+function completeStep(stepIndex) {
+    // Marqueur vert
+    markers[stepIndex].setIcon(createCompletedIcon(stepIndex + 1));
+
+    // Envoyer à PandaSuite
+    PandaBridge.send("etape_complete", [{
+        etape: stepIndex + 1,
+        lieu: parcours.etapes[stepIndex].lieu_nom,
+        score: score,
+        total_etapes: parcours.etapes.length
+    }]);
+
+    // Après 2 secondes, fermer le panneau et montrer le bouton suivant
+    setTimeout(function() {
+        if (stepIndex < parcours.etapes.length - 1) {
+            currentStep = stepIndex + 1;
+            markers[currentStep].setIcon(createStepIcon(currentStep + 1, true));
+            showNextButton();
+        } else {
+            // Parcours terminé
+            showConclusion();
+        }
+    }, 2000);
+}
+
+// === BOUTON ÉTAPE SUIVANTE ===
+function showNextButton() {
+    var btn = document.getElementById('btn-next');
+    btn.textContent = 'Aller à l\'étape ' + (currentStep + 1) + ' →';
+    btn.style.display = 'block';
+    btn.onclick = function() {
+        document.getElementById('panel').classList.remove('visible');
+        var etape = parcours.etapes[currentStep];
+        map.flyTo([etape.latitude, etape.longitude], 16, { duration: 1.5 });
+        setTimeout(function() { showPanel(currentStep); }, 1600);
+    };
+}
+
+// === CONCLUSION ===
+function showConclusion() {
+    document.getElementById('panel').classList.remove('visible');
+    document.getElementById('btn-next').style.display = 'none';
+
+    document.getElementById('conclusion-score').textContent = score + ' / ' + (parcours.etapes.length * 100) + ' pts';
+    document.getElementById('conclusion-text').textContent = parcours.conclusion || 'Bravo, aventurier !';
+    document.getElementById('conclusion-panel').classList.add('visible');
+
+    // Envoyer le score final à PandaSuite
+    PandaBridge.send("parcours_termine", [{
+        score: score,
+        total: parcours.etapes.length * 100,
+        titre: parcours.titre
+    }]);
+}
+
+// === FERMER LE PANNEAU ===
+document.getElementById('panel-close').addEventListener('click', function() {
+    document.getElementById('panel').classList.remove('visible');
+    showNextButton();
+});
+
+// === RÉCEPTION DES DONNÉES DEPUIS PANDASUITE ===
+PandaBridge.listen(function(event) {
+    if (event && event.data) {
+        loadParcours(event.data);
+    }
+});
+
+// Aussi écouter via les propriétés
+PandaBridge.listen('props', function(props) {
+    if (props && props.parcours) {
+        loadParcours(props.parcours);
+    }
+});
+
+// === MODE TEST : charger un parcours de démo ===
+// Décommenter pour tester sans PandaSuite
+/*
+loadParcours({
+    "titre": "Test Orléans",
+    "conclusion": "Bravo aventurier !",
+    "etapes": [
+        {"ordre":1,"lieu_nom":"Place du Martroi","latitude":47.9038,"longitude":1.9061,"narration_arrivee":"Bienvenue !","interaction":{"type_interaction":"quiz","question":"Qui est la statue ?","reponses":["Jeanne d'Arc","Louis XIV","Napoléon"],"bonne_reponse":0,"indice":"Pensez à Orléans"},"narration_reussite":"Bravo !","narration_echec":"C'était Jeanne d'Arc","points":100},
+        {"ordre":2,"lieu_nom":"Cathédrale","latitude":47.9025,"longitude":1.909,"narration_arrivee":"Quelle hauteur !","interaction":{"type_interaction":"photo","consigne":"Prenez la façade en photo","indice":"Reculez"},"narration_reussite":"Belle photo !","narration_echec":"Réessayez","points":100}
+    ]
+});
+*/
+</script>
+
+</body>
+</html>
