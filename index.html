@@ -463,9 +463,33 @@ document.getElementById('panel-close').addEventListener('click', function() {
 });
 
 // === RÉCEPTION DES DONNÉES DEPUIS PANDASUITE VIA MARKER ===
+// Quand le marqueur est déclenché, on lit les propriétés PandaSuite
 PandaBridge.listen("marker18646", function(args) {
+    // Essayer d'abord les args du marqueur
     if (args && args[0]) {
         loadParcours(args[0]);
+        return;
+    }
+    // Sinon lire les propriétés (parcours_genere stocké dans PandaSuite)
+    PandaBridge.getProperties(function(props) {
+        if (props && props.parcours_genere) {
+            var data = props.parcours_genere;
+            if (typeof data === 'string') {
+                try { data = JSON.parse(data); } catch(e) {}
+            }
+            loadParcours(data);
+        }
+    });
+});
+
+// Aussi écouter les changements de propriétés
+PandaBridge.listen('props', function(props) {
+    if (props && props.parcours_genere) {
+        var data = props.parcours_genere;
+        if (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch(e) {}
+        }
+        loadParcours(data);
     }
 });
 
