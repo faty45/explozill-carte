@@ -1,0 +1,225 @@
+{
+  "version": "2.0.0",
+  "main": "",
+  "properties": [],
+  "events": [
+    {
+      "id": "loading_start",
+      "name": "Loading started",
+      "locale_name": { "fr_FR": "Chargement demarre" },
+      "queryable": {
+        "status": "Connexion...",
+        "__desc_status": {
+          "name": "Status message",
+          "locale_name": { "fr_FR": "Message de statut" }
+        }
+      }
+    },
+    {
+      "id": "loading_status",
+      "name": "Loading status update",
+      "locale_name": { "fr_FR": "Mise a jour chargement" },
+      "queryable": {
+        "status": "En cours...",
+        "__desc_status": {
+          "name": "Status message",
+          "locale_name": { "fr_FR": "Message de statut" }
+        }
+      }
+    },
+    {
+      "id": "parcours_ready",
+      "name": "Parcours ready",
+      "locale_name": { "fr_FR": "Parcours pret" },
+      "queryable": {
+        "titre": "Titre du parcours",
+        "__desc_titre": {
+          "name": "Trail title",
+          "locale_name": { "fr_FR": "Titre du parcours" }
+        },
+        "ville": "Tours",
+        "__desc_ville": {
+          "name": "City",
+          "locale_name": { "fr_FR": "Ville" }
+        },
+        "introduction": "Texte introduction",
+        "__desc_introduction": {
+          "name": "Introduction text",
+          "locale_name": { "fr_FR": "Introduction" }
+        },
+        "conclusion": "Texte conclusion",
+        "__desc_conclusion": {
+          "name": "Conclusion text",
+          "locale_name": { "fr_FR": "Conclusion" }
+        }
+      }
+    },
+    {
+      "id": "etape_active",
+      "name": "Step activated",
+      "locale_name": { "fr_FR": "Etape activee" },
+      "queryable": {
+        "ordre": 1,
+        "__desc_ordre": {
+          "name": "Step order",
+          "locale_name": { "fr_FR": "Numero etape" }
+        },
+        "lieu_nom": "Nom du lieu",
+        "__desc_lieu_nom": {
+          "name": "Location name",
+          "locale_name": { "fr_FR": "Nom du lieu" }
+        },
+        "narration_arrivee": "Texte narration",
+        "__desc_narration_arrivee": {
+          "name": "Arrival narration",
+          "locale_name": { "fr_FR": "Narration arrivee" }
+        },
+        "narration_reussite": "Texte reussite",
+        "__desc_narration_reussite": {
+          "name": "Success narration",
+          "locale_name": { "fr_FR": "Narration reussite" }
+        },
+        "narration_echec": "Texte echec",
+        "__desc_narration_echec": {
+          "name": "Failure narration",
+          "locale_name": { "fr_FR": "Narration echec" }
+        },
+        "points": 100,
+        "__desc_points": {
+          "name": "Points",
+          "locale_name": { "fr_FR": "Points" }
+        },
+        "type_interaction": "quiz",
+        "__desc_type_interaction": {
+          "name": "Interaction type",
+          "locale_name": { "fr_FR": "Type interaction" }
+        },
+        "question": "Question du quiz",
+        "__desc_question": {
+          "name": "Question",
+          "locale_name": { "fr_FR": "Question" }
+        },
+        "consigne": "Consigne du defi",
+        "__desc_consigne": {
+          "name": "Challenge instruction",
+          "locale_name": { "fr_FR": "Consigne" }
+        },
+        "indice": "Indice",
+        "__desc_indice": {
+          "name": "Hint",
+          "locale_name": { "fr_FR": "Indice" }
+        },
+        "bonne_reponse": 0,
+        "__desc_bonne_reponse": {
+          "name": "Correct answer index",
+          "locale_name": { "fr_FR": "Bonne reponse" }
+        },
+        "etape_num": 1,
+        "__desc_etape_num": {
+          "name": "Step number",
+          "locale_name": { "fr_FR": "Numero etape" }
+        },
+        "total_etapes": 3,
+        "__desc_total_etapes": {
+          "name": "Total steps",
+          "locale_name": { "fr_FR": "Total etapes" }
+        },
+        "score_actuel": 0,
+        "__desc_score_actuel": {
+          "name": "Current score",
+          "locale_name": { "fr_FR": "Score actuel" }
+        },
+        "titre_parcours": "Titre",
+        "__desc_titre_parcours": {
+          "name": "Trail title",
+          "locale_name": { "fr_FR": "Titre du parcours" }
+        },
+        "is_last": false,
+        "__desc_is_last": {
+          "name": "Is last step",
+          "locale_name": { "fr_FR": "Derniere etape" }
+        }
+      }
+    },
+    {
+      "id": "parcours_termine",
+      "name": "Trail completed",
+      "locale_name": { "fr_FR": "Parcours termine" },
+      "queryable": {
+        "score": 0,
+        "__desc_score": {
+          "name": "Final score",
+          "locale_name": { "fr_FR": "Score final" }
+        },
+        "total": 300,
+        "__desc_total": {
+          "name": "Maximum score",
+          "locale_name": { "fr_FR": "Score maximum" }
+        },
+        "titre": "Titre",
+        "__desc_titre": {
+          "name": "Trail title",
+          "locale_name": { "fr_FR": "Titre du parcours" }
+        },
+        "conclusion": "Texte conclusion",
+        "__desc_conclusion": {
+          "name": "Conclusion text",
+          "locale_name": { "fr_FR": "Texte de conclusion" }
+        }
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "etape_reponse",
+      "name": "Send answer",
+      "locale_name": { "fr_FR": "Envoyer reponse" },
+      "params": [
+        {
+          "id": "etape_num",
+          "name": "Step number",
+          "locale_name": { "fr_FR": "Numero etape" },
+          "type": "Integer",
+          "value": 1
+        },
+        {
+          "id": "points_gagnes",
+          "name": "Points earned",
+          "locale_name": { "fr_FR": "Points gagnes" },
+          "type": "Integer",
+          "value": 0
+        },
+        {
+          "id": "next",
+          "name": "Go to next step",
+          "locale_name": { "fr_FR": "Etape suivante" },
+          "type": "Boolean",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "aller_etape",
+      "name": "Go to step",
+      "locale_name": { "fr_FR": "Aller a etape" },
+      "params": [
+        {
+          "id": "etape_num",
+          "name": "Step number",
+          "locale_name": { "fr_FR": "Numero etape" },
+          "type": "Integer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "demander_parcours",
+      "name": "Request trail data",
+      "locale_name": { "fr_FR": "Demander le parcours" }
+    }
+  ],
+  "markers": [],
+  "synchronization": [],
+  "queryable": {},
+  "system": {}
+}
