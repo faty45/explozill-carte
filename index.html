@@ -6,6 +6,7 @@
     <title>Explozill - Carte</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -15,81 +16,125 @@
         /* ===== LOADING SCREEN ===== */
         #loading-screen{
             position:fixed;top:0;left:0;right:0;bottom:0;z-index:3000;
-            background:linear-gradient(160deg,#0a1628 0%,#1a237e 40%,#283593 70%,#0d47a1 100%);
+            background:url('https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/JktACOUBoaXaVrwt.jpg') center/cover no-repeat;
             display:flex;flex-direction:column;align-items:center;justify-content:center;
             padding:32px 24px;text-align:center;color:#fff;
-            transition:opacity .6s ease
+            transition:opacity .8s ease
         }
+        #loading-screen::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,.35)}
+        #loading-screen>*{position:relative;z-index:1}
         #loading-screen.hide{opacity:0;pointer-events:none}
-        .ld-moonsky{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(0,0,0,.5));animation:moonBounce 1.5s ease-in-out infinite}
-        @keyframes moonBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
-        .ld-title{font-size:22px;font-weight:900;margin-top:22px;margin-bottom:6px}
-        .ld-city{font-size:15px;font-weight:700;opacity:.6;margin-bottom:28px}
-        .ld-bubble{background:rgba(255,255,255,.12);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,.2);border-radius:18px;padding:16px 22px;font-size:17px;font-weight:700;line-height:1.65;color:#fff;max-width:330px;min-height:65px;margin-bottom:24px}
-        .ld-dots{display:flex;gap:10px;justify-content:center}
-        .ld-dots span{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.35);animation:dotPulse 1.4s ease-in-out infinite}
+        .ld-moonsky{width:160px;height:160px;object-fit:contain;filter:drop-shadow(0 0 30px rgba(102,126,234,.6)) drop-shadow(0 0 60px rgba(118,75,162,.3));animation:moonFloat 3s ease-in-out infinite}
+        @keyframes moonFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.03)}}
+        .ld-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(102,126,234,.3) 0%,transparent 70%);animation:glowPulse 2s ease-in-out infinite;pointer-events:none}
+        @keyframes glowPulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.3);opacity:1}}
+        .ld-title{font-size:24px;font-weight:900;margin-top:24px;margin-bottom:4px;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+        .ld-city{font-size:16px;font-weight:700;opacity:.7;margin-bottom:28px;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+        .ld-bubble{background:rgba(255,255,255,.1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:16px 24px;font-size:17px;font-weight:700;line-height:1.65;color:#fff;max-width:330px;min-height:65px;margin-bottom:28px;text-shadow:0 1px 6px rgba(0,0,0,.3)}
+        .ld-dots{display:flex;gap:12px;justify-content:center}
+        .ld-dots span{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.4);animation:dotPulse 1.4s ease-in-out infinite}
         .ld-dots span:nth-child(2){animation-delay:.2s}
         .ld-dots span:nth-child(3){animation-delay:.4s}
-        @keyframes dotPulse{0%,80%,100%{transform:scale(.5);opacity:.35}40%{transform:scale(1.1);opacity:1}}
+        @keyframes dotPulse{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1.2);opacity:1}}
+
+        /* ===== PARTICLES ===== */
+        .particle{position:fixed;width:3px;height:3px;border-radius:50%;pointer-events:none;z-index:2999;animation:particleFloat linear infinite}
+        @keyframes particleFloat{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-10vh) rotate(360deg);opacity:0}}
 
         /* ===== UI BADGES ===== */
-        #score-badge{position:fixed;top:12px;right:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:8px 16px;border-radius:20px;z-index:1000;font-size:15px;font-weight:800;box-shadow:0 3px 14px rgba(0,0,0,.25);display:none}
-        #route-title{position:fixed;top:12px;left:12px;right:110px;background:rgba(255,255,255,.95);padding:9px 16px;border-radius:14px;z-index:1000;font-size:14px;font-weight:800;color:#1a1a2e;box-shadow:0 2px 14px rgba(0,0,0,.12);display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        #ai-badge{position:fixed;top:50px;left:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:4px 14px;border-radius:12px;z-index:1000;font-size:11px;font-weight:700;display:none}
+        #score-badge{position:fixed;top:14px;right:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:10px 18px;border-radius:22px;z-index:1000;font-size:16px;font-weight:800;box-shadow:0 4px 20px rgba(102,126,234,.4);display:none}
+        #route-title{position:fixed;top:14px;left:14px;right:120px;background:rgba(255,255,255,.95);padding:10px 18px;border-radius:14px;z-index:1000;font-size:15px;font-weight:800;color:#1a1a2e;box-shadow:0 3px 16px rgba(0,0,0,.12);display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        #ai-badge{position:fixed;top:54px;left:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:5px 14px;border-radius:12px;z-index:1000;font-size:11px;font-weight:700;display:none;letter-spacing:.5px}
 
-        #etape-info{position:fixed;bottom:18px;left:18px;right:18px;background:#fff;border-radius:18px;padding:16px 20px;box-shadow:0 4px 28px rgba(0,0,0,.18);z-index:999;display:none;cursor:pointer}
-        #etape-info-title{font-size:16px;font-weight:800;color:#1a1a2e;margin-bottom:4px}
-        #etape-info-subtitle{font-size:14px;color:#667eea;font-weight:700}
+        /* ===== BOTTOM NAV BAR ===== */
+        #bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,.08);padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:998;display:none}
+        .nav-items{display:flex;justify-content:space-around;align-items:center}
+        .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;opacity:.5;transition:opacity .2s}
+        .nav-item.active{opacity:1}
+        .nav-item i{font-size:20px;color:#667eea}
+        .nav-item span{font-size:10px;font-weight:700;color:#1a1a2e}
 
-        /* ===== MOONSKY BULLES ===== */
-        .mk-row{display:flex;align-items:flex-end;gap:0;width:100%;max-width:360px;margin-bottom:18px}
-        .mk-img{width:85px;height:85px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 3px 10px rgba(0,0,0,.45))}
-        .mk-bubble{position:relative;background:rgba(255,255,255,.15);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,.25);border-radius:18px;padding:14px 18px;font-size:16px;font-weight:600;line-height:1.65;color:#fff;flex:1;margin-left:-4px;min-height:55px}
-        .mk-bubble::before{content:'';position:absolute;left:-10px;bottom:20px;border-top:8px solid transparent;border-bottom:8px solid transparent;border-right:10px solid rgba(255,255,255,.15)}
+        #etape-info{position:fixed;bottom:70px;left:18px;right:18px;background:rgba(255,255,255,.97);border-radius:20px;padding:18px 22px;box-shadow:0 6px 32px rgba(0,0,0,.2);z-index:999;display:none;cursor:pointer;border:1px solid rgba(102,126,234,.15)}
+        #etape-info-title{font-size:17px;font-weight:800;color:#1a1a2e;margin-bottom:4px}
+        #etape-info-subtitle{font-size:15px;color:#667eea;font-weight:700}
 
         /* ===== OVERLAY SCREENS ===== */
         #overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2000;display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
-        .scr{min-height:100%;width:100%;background:linear-gradient(160deg,#0a1628 0%,#1a237e 40%,#283593 70%,#0d47a1 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 26px;text-align:center;color:#fff}
+        .scr{min-height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;text-align:center;color:#fff;position:relative;overflow:hidden}
+        .scr::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,.55);z-index:1}
+        .scr>*{position:relative;z-index:2}
         .scr.off{display:none}
-        .badge{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);padding:6px 18px;border-radius:24px;font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:18px}
-        .lieu{font-size:26px;font-weight:900;margin-bottom:20px;text-shadow:0 2px 14px rgba(0,0,0,.3);line-height:1.25}
+        .scr-bg{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;z-index:0}
+        .scr-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0}
 
-        .btn-p{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;padding:16px 48px;border-radius:34px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 4px 20px rgba(102,126,234,.4);letter-spacing:.5px}
-        .btn-p:active{transform:scale(.96)}
-        .btn-g{background:linear-gradient(135deg,#28a745,#20c997);color:#fff;border:none;padding:16px 48px;border-radius:34px;font-size:17px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 4px 20px rgba(40,167,69,.4)}
-        .btn-o{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:14px 38px;border-radius:34px;font-size:16px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer}
+        /* ===== MOONSKY BULLES ===== */
+        .mk-row{display:flex;align-items:flex-end;gap:0;width:100%;max-width:360px;margin-bottom:20px}
+        .mk-img{width:100px;height:100px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 0 20px rgba(102,126,234,.5));animation:moonFloat 3s ease-in-out infinite}
+        .mk-bubble{position:relative;background:rgba(255,255,255,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:16px 20px;font-size:17px;font-weight:600;line-height:1.65;color:#fff;flex:1;margin-left:-6px;min-height:60px;text-shadow:0 1px 6px rgba(0,0,0,.3)}
+        .mk-bubble::before{content:'';position:absolute;left:-10px;bottom:22px;border-top:8px solid transparent;border-bottom:8px solid transparent;border-right:10px solid rgba(255,255,255,.12)}
 
-        .q-question{font-size:20px;font-weight:800;text-align:center;margin-bottom:22px;line-height:1.45;max-width:340px}
+        .badge{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);padding:7px 20px;border-radius:26px;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+        .lieu{font-size:28px;font-weight:900;margin-bottom:22px;text-shadow:0 3px 16px rgba(0,0,0,.4);line-height:1.25}
+
+        .btn-p{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;padding:17px 50px;border-radius:36px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(102,126,234,.45);letter-spacing:.5px;transition:transform .15s}
+        .btn-p:active{transform:scale(.95)}
+        .btn-g{background:linear-gradient(135deg,#28a745,#20c997);color:#fff;border:none;padding:17px 50px;border-radius:36px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(40,167,69,.4);transition:transform .15s}
+        .btn-g:active{transform:scale(.95)}
+        .btn-o{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,.25);color:#fff;padding:15px 40px;border-radius:36px;font-size:17px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;transition:transform .15s}
+        .btn-o:active{transform:scale(.95)}
+
+        .q-question{font-size:21px;font-weight:800;text-align:center;margin-bottom:24px;line-height:1.45;max-width:340px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
         .q-answers{width:100%;max-width:340px}
-        .q-btn{display:block;width:100%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.25);color:#fff;padding:15px 20px;border-radius:16px;font-size:17px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;margin-bottom:13px;text-align:left;transition:all .2s}
+        .q-btn{display:block;width:100%;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,.2);color:#fff;padding:16px 22px;border-radius:18px;font-size:17px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;margin-bottom:14px;text-align:left;transition:all .2s;text-shadow:0 1px 4px rgba(0,0,0,.2)}
         .q-btn:active{transform:scale(.97)}
-        .q-btn.ok{background:rgba(40,167,69,.35);border-color:#28a745}
-        .q-btn.ko{background:rgba(220,53,69,.35);border-color:#dc3545}
-        .hint-box{margin-top:16px;background:rgba(255,255,255,.1);border-radius:14px;padding:14px 18px;font-size:15px;opacity:.85;max-width:340px}
-        .hint-btn{background:none;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.75);padding:8px 20px;border-radius:20px;font-size:14px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;margin-top:14px}
+        .q-btn.ok{background:rgba(40,167,69,.4);border-color:#28a745;box-shadow:0 0 20px rgba(40,167,69,.3)}
+        .q-btn.ko{background:rgba(220,53,69,.4);border-color:#dc3545;box-shadow:0 0 20px rgba(220,53,69,.3)}
+        .hint-box{margin-top:16px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border-radius:16px;padding:14px 20px;font-size:15px;max-width:340px;text-shadow:0 1px 4px rgba(0,0,0,.2)}
+        .hint-btn{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;padding:9px 22px;border-radius:22px;font-size:14px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;margin-top:14px}
 
-        .photo-txt{font-size:19px;font-weight:700;margin-bottom:20px;line-height:1.55;max-width:330px}
-        .r-emoji{font-size:60px;margin-bottom:14px}
-        .r-title{font-size:26px;font-weight:900;margin-bottom:8px}
-        .r-pts{font-size:38px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px}
-        .c-score{font-size:48px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+        .photo-txt{font-size:20px;font-weight:700;margin-bottom:22px;line-height:1.55;max-width:330px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+        .r-emoji{font-size:64px;margin-bottom:16px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
+        .r-title{font-size:28px;font-weight:900;margin-bottom:10px;text-shadow:0 3px 16px rgba(0,0,0,.4)}
+        .r-pts{font-size:42px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;filter:drop-shadow(0 2px 8px rgba(255,215,0,.4))}
+        .c-score{font-size:52px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px;filter:drop-shadow(0 2px 8px rgba(255,215,0,.4))}
 
-        .voice-btn{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-        .voice-btn.muted{opacity:.4}
+        .voice-btn{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);color:#fff;width:48px;height:48px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:opacity .2s}
+        .voice-btn.muted{opacity:.35}
 
-        @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        .anim{animation:fadeIn .4s ease-out}
-        @keyframes bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
-        .bounce{animation:bounceIn .6s ease-out}
-        @keyframes scoreUp{0%{transform:scale(1)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+        /* ===== SHARE MODAL ===== */
+        #share-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:4000;display:none;align-items:flex-end;justify-content:center}
+        .share-sheet{background:#fff;border-radius:24px 24px 0 0;padding:28px 24px max(24px,env(safe-area-inset-bottom));width:100%;max-width:420px}
+        .share-title{font-size:18px;font-weight:800;color:#1a1a2e;margin-bottom:20px;text-align:center}
+        .share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+        .share-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+        .share-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff}
+        .share-icon.wa{background:#25D366}
+        .share-icon.fb{background:#1877F2}
+        .share-icon.tw{background:#1DA1F2}
+        .share-icon.ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}
+        .share-icon.tik{background:#000}
+        .share-icon.sn{background:#FFFC00;color:#000}
+        .share-icon.cp{background:#667eea}
+        .share-icon.ml{background:#EA4335}
+        .share-label{font-size:11px;font-weight:700;color:#666}
+        .share-close{margin-top:20px;width:100%;padding:14px;border-radius:16px;border:none;background:#f0f0f0;font-size:16px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;color:#333}
+
+        @keyframes fadeIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+        .anim{animation:fadeIn .5s ease-out}
+        @keyframes bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.08)}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
+        .bounce{animation:bounceIn .7s ease-out}
+        @keyframes scoreUp{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
         .score-up{animation:scoreUp .5s ease}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .slide-up{animation:slideUp .3s ease-out}
     </style>
 </head>
 <body>
 
 <!-- ===== LOADING SCREEN ===== -->
 <div id="loading-screen">
-    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/OzdLzpGilysdjrSQ.png" class="ld-moonsky" alt="Moonsky"/>
+    <div class="ld-glow"></div>
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/pwPvPthSItnrIyBy.png" class="ld-moonsky" alt="Moonsky"/>
     <div class="ld-title">Moonsky prepare ton aventure...</div>
     <div class="ld-city" id="ld-city">Tours</div>
     <div class="ld-bubble" id="ld-bubble"></div>
@@ -99,109 +144,167 @@
 <!-- ===== MAP ===== -->
 <div id="map"></div>
 <div id="route-title"></div>
-<div id="ai-badge">&#10024; GENERE PAR IA</div>
-<div id="score-badge">&#128062; <span id="score-value">0</span> pts</div>
+<div id="ai-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> GENERE PAR IA</div>
+<div id="score-badge"><i class="fa-solid fa-paw"></i> <span id="score-value">0</span> pts</div>
 
 <div id="etape-info" onclick="openEtape()">
     <div id="etape-info-title"></div>
     <div id="etape-info-subtitle">APPUYER POUR COMMENCER</div>
 </div>
 
+<!-- ===== BOTTOM NAV BAR ===== -->
+<div id="bottom-nav">
+    <div class="nav-items">
+        <div class="nav-item active" onclick="navMap()"><i class="fa-solid fa-map-location-dot"></i><span>Carte</span></div>
+        <div class="nav-item" onclick="navHistory()"><i class="fa-solid fa-clock-rotate-left"></i><span>Historique</span></div>
+        <div class="nav-item" onclick="navShare()"><i class="fa-solid fa-share-nodes"></i><span>Partager</span></div>
+        <div class="nav-item" onclick="navFavoris()"><i class="fa-solid fa-heart"></i><span>Favoris</span></div>
+        <div class="nav-item" onclick="navProfil()"><i class="fa-solid fa-user"></i><span>Profil</span></div>
+    </div>
+</div>
+
 <!-- ===== OVERLAY ===== -->
 <div id="overlay">
     <div id="scr-intro" class="scr anim" style="position:relative">
-        <button class="voice-btn" id="voiceToggle" onclick="toggleVoice(event)">&#128266;</button>
+        <div class="scr-bg" id="intro-bg"></div>
+        <button class="voice-btn" id="voiceToggle" onclick="toggleVoice(event)"><i class="fa-solid fa-volume-high"></i></button>
         <div class="badge" id="intro-badge">ETAPE 1/5</div>
         <div class="lieu" id="intro-lieu"></div>
         <div class="mk-row">
-            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/OzdLzpGilysdjrSQ.png" class="mk-img" alt="Moonsky"/>
+            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/pwPvPthSItnrIyBy.png" class="mk-img" alt="Moonsky"/>
             <div class="mk-bubble" id="intro-bubble"></div>
         </div>
-        <button class="btn-p" onclick="showDefi()">Lancer le defi &#127919;</button>
+        <button class="btn-p" onclick="showDefi()"><i class="fa-solid fa-gamepad"></i> Lancer le defi</button>
     </div>
 
     <div id="scr-quiz" class="scr off">
-        <div class="badge" id="quiz-badge">&#129513; QUIZ</div>
+        <div class="scr-bg" id="quiz-bg"></div>
+        <video class="scr-video" id="quiz-video" autoplay muted loop playsinline></video>
+        <div class="badge" id="quiz-badge"><i class="fa-solid fa-brain"></i> QUIZ</div>
         <div class="q-question" id="quiz-q"></div>
         <div class="q-answers" id="quiz-a"></div>
-        <button class="hint-btn" onclick="toggleHint()">&#128161; Indice</button>
+        <button class="hint-btn" onclick="toggleHint()"><i class="fa-solid fa-lightbulb"></i> Indice</button>
         <div class="hint-box" id="quiz-hint" style="display:none"></div>
     </div>
 
     <div id="scr-photo" class="scr off">
-        <div class="badge" id="photo-badge">&#128248; DEFI PHOTO</div>
+        <div class="scr-bg" id="photo-bg"></div>
+        <div class="badge" id="photo-badge"><i class="fa-solid fa-camera"></i> DEFI PHOTO</div>
         <div class="mk-row" style="justify-content:center">
-            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/OzdLzpGilysdjrSQ.png" class="mk-img" alt="Moonsky"/>
+            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/pwPvPthSItnrIyBy.png" class="mk-img" alt="Moonsky"/>
             <div class="mk-bubble" id="photo-bubble"></div>
         </div>
         <div class="photo-txt" id="photo-txt"></div>
-        <button class="btn-g" onclick="photoOk()">&#9989; C'est fait !</button>
+        <button class="btn-g" onclick="photoOk()"><i class="fa-solid fa-check"></i> C'est fait !</button>
     </div>
 
     <div id="scr-result" class="scr off">
+        <div class="scr-bg" id="result-bg" style="background-image:url('https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/CRKdxRIRYakrLgGm.jpg')"></div>
         <div class="r-emoji" id="r-emoji">&#127881;</div>
         <div class="r-title" id="r-title">Bravo !</div>
         <div class="r-pts" id="r-pts">+100 pts</div>
         <div class="mk-row" style="justify-content:center">
-            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/OzdLzpGilysdjrSQ.png" class="mk-img" alt="Moonsky"/>
+            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/pwPvPthSItnrIyBy.png" class="mk-img" alt="Moonsky"/>
             <div class="mk-bubble" id="r-bubble"></div>
         </div>
-        <button class="btn-p" id="btn-next" onclick="nextStep()">Etape suivante &#8594;</button>
+        <button class="btn-p" id="btn-next" onclick="nextStep()">Etape suivante <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
-    <div id="scr-end" class="scr off" style="background:linear-gradient(160deg,#0a1628 0%,#0d47a1 50%,#1565c0 100%)">
-        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/OzdLzpGilysdjrSQ.png" class="mk-img bounce" style="width:110px;height:110px;margin-bottom:14px" alt="Moonsky"/>
+    <div id="scr-end" class="scr off">
+        <div class="scr-bg" style="background-image:url('https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/ahZrUdExuUdmMJHX.jpg')"></div>
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/pwPvPthSItnrIyBy.png" class="mk-img bounce" style="width:130px;height:130px;margin-bottom:16px" alt="Moonsky"/>
         <div class="r-title" style="margin-top:10px">Parcours termine !</div>
         <div class="c-score" id="end-score">0/0</div>
         <div class="mk-row" style="justify-content:center">
             <div class="mk-bubble" id="end-bubble" style="margin-left:0"></div>
         </div>
-        <button class="btn-o" onclick="backToMap()">&#128506; Retour a la carte</button>
+        <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;justify-content:center">
+            <button class="btn-p" onclick="navShare()"><i class="fa-solid fa-share-nodes"></i> Partager</button>
+            <button class="btn-o" onclick="backToMap()"><i class="fa-solid fa-map"></i> Carte</button>
+        </div>
     </div>
 </div>
+
+<!-- ===== SHARE MODAL ===== -->
+<div id="share-modal" onclick="closeShare(event)">
+    <div class="share-sheet slide-up" onclick="event.stopPropagation()">
+        <div class="share-title">Partager mon aventure</div>
+        <div class="share-grid">
+            <div class="share-item" onclick="shareWA()"><div class="share-icon wa"><i class="fa-brands fa-whatsapp"></i></div><div class="share-label">WhatsApp</div></div>
+            <div class="share-item" onclick="shareFB()"><div class="share-icon fb"><i class="fa-brands fa-facebook-f"></i></div><div class="share-label">Facebook</div></div>
+            <div class="share-item" onclick="shareTW()"><div class="share-icon tw"><i class="fa-brands fa-x-twitter"></i></div><div class="share-label">X</div></div>
+            <div class="share-item" onclick="shareIG()"><div class="share-icon ig"><i class="fa-brands fa-instagram"></i></div><div class="share-label">Instagram</div></div>
+            <div class="share-item" onclick="shareTK()"><div class="share-icon tik"><i class="fa-brands fa-tiktok"></i></div><div class="share-label">TikTok</div></div>
+            <div class="share-item" onclick="shareSN()"><div class="share-icon sn"><i class="fa-brands fa-snapchat"></i></div><div class="share-label">Snap</div></div>
+            <div class="share-item" onclick="copyLink()"><div class="share-icon cp"><i class="fa-solid fa-link"></i></div><div class="share-label">Copier</div></div>
+            <div class="share-item" onclick="shareMail()"><div class="share-icon ml"><i class="fa-solid fa-envelope"></i></div><div class="share-label">Email</div></div>
+        </div>
+        <button class="share-close" onclick="closeShare()">Fermer</button>
+    </div>
+</div>
+
+<!-- ===== AUDIO ===== -->
+<audio id="tts-audio" preload="none"></audio>
 
 <script>
 var WEBHOOK='https://hook.eu2.make.com/sazwwf4twy6hcfu3qckrqrl4v7hubdbl';
 var DEFAULTS={duree:'Expresso',mobilite:'A pied',theme:'Decouverte',pauses:'Non',mood:'Aventurier',compo:'Duo',ville:'Tours',lat:'47.3942',lng:'0.6885'};
 
-// ===== PARCOURS DEMO : 5 etapes rapprochees Vieux Tours =====
+// ===== ELEVENLABS CONFIG =====
+var ELEVENLABS_KEY='sk_4784ea31bef32f99e800809c55c5e3ddf5c5602f2a3f0797';
+var ELEVENLABS_VOICE='IKne3meq5aSn9XLyUdCD'; // Charlie
+
+// ===== IMAGES LIEUX (Unsplash libre de droit) =====
+var LIEU_IMAGES={
+    'default':'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
+    'Place Plumereau':'https://images.unsplash.com/photo-1568684333877-4d39f2f5b3c0?w=800&q=80',
+    'Rue du Grand Marche':'https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80',
+    'Tour Charlemagne':'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&q=80',
+    'Rue Colbert':'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
+    'Place Chateauneuf':'https://images.unsplash.com/photo-1555990793-da11153b2473?w=800&q=80'
+};
+// Videos libres de droit pour quiz
+var QUIZ_VIDEOS=['https://cdn.pixabay.com/video/2020/05/25/39831-424930032_large.mp4','https://cdn.pixabay.com/video/2019/06/21/24632-343700032_large.mp4','https://cdn.pixabay.com/video/2024/02/14/200712-912879254_large.mp4'];
+var vidIdx=0;
+
+// ===== PARCOURS DEMO =====
 var DEMO={
  titre:"Secrets du Vieux Tours",
  ville:"Tours",
  introduction:"Salut aventurier ! Moi c'est Moonsky. Pret a percer les secrets du Vieux Tours ? C'est parti !",
  etapes:[
   {ordre:1,lieu_nom:"Place Plumereau",latitude:47.39485,longitude:0.68330,
-   narration_arrivee:"Bienvenue sur la Place Plumereau ! C'est le coeur battant du Vieux Tours. Regarde ces magnifiques facades a colombages tout autour de toi. Savais-tu que Balzac, le celebre ecrivain, venait ici se cacher de ses creanciers ?",
+   narration_arrivee:"Bienvenue sur la Place Plumereau ! C'est le coeur battant du Vieux Tours. Regarde ces magnifiques facades a colombages. Savais-tu que Balzac, le celebre ecrivain, venait ici se cacher de ses creanciers ?",
    interaction:{type_interaction:"quiz",question:"Quel celebre ecrivain tourangeau se cachait de ses creanciers dans le Vieux Tours ?",reponses:["Victor Hugo","Honore de Balzac","Emile Zola","Rabelais"],bonne_reponse:1,indice:"Il a ecrit La Comedie Humaine et etait ne a Tours en 1799."},
-   narration_reussite:"Excellent ! Balzac est ne a Tours en 1799. Il adorait ce quartier mais fuyait souvent ses dettes. Aujourd'hui la Place Plumereau est le spot le plus anime de la ville !",
-   narration_echec:"C'etait Balzac ! Ne a Tours en 1799, il venait souvent ici. Allez, on continue !",
+   narration_reussite:"Excellent ! Balzac est ne a Tours en 1799. Il adorait ce quartier mais fuyait souvent ses dettes !",
+   narration_echec:"C'etait Balzac ! Ne a Tours en 1799, il venait souvent ici.",
    points:100},
   {ordre:2,lieu_nom:"Rue du Grand Marche",latitude:47.39430,longitude:0.68450,
-   narration_arrivee:"Tu es maintenant rue du Grand Marche. Cette rue medievale regorge de details caches. Fun fact : le chef etoile Olivier Arlot, originaire de Touraine, s'inspire de ces ruelles pour ses creations culinaires !",
-   interaction:{type_interaction:"photo",consigne:"Trouve et photographie un detail sculpte sur une facade de cette rue. Cherche au-dessus des portes !",indice:"Leve la tete ! Les details sont souvent en hauteur, au-dessus des portes ou des fenetres."},
-   narration_reussite:"Super trouvaille ! Ces details sculptes racontent l'histoire des artisans tourangeaux du XVe siecle.",
+   narration_arrivee:"Rue du Grand Marche ! Cette rue medievale regorge de details caches. Fun fact : le chef etoile Olivier Arlot s'inspire de ces ruelles pour ses creations culinaires !",
+   interaction:{type_interaction:"photo",consigne:"Trouve et photographie un detail sculpte sur une facade de cette rue. Cherche au-dessus des portes !",indice:"Leve la tete ! Les details sont souvent en hauteur."},
+   narration_reussite:"Super trouvaille ! Ces details sculptes racontent l'histoire des artisans tourangeaux.",
    narration_echec:"Pas de souci, ces details sont parfois bien caches !",
    points:100},
   {ordre:3,lieu_nom:"Tour Charlemagne",latitude:47.39340,longitude:0.68520,
-   narration_arrivee:"Voici la Tour Charlemagne ! Ce vestige imposant de 56 metres est tout ce qui reste de l'ancienne basilique Saint-Martin. A deux pas, l'entreprise Mame, ancien fleuron de l'imprimerie tourangelle, a ete transformee en cite de la creation !",
-   interaction:{type_interaction:"quiz",question:"La Tour Charlemagne doit son nom a Charlemagne. Mais pourquoi exactement ?",reponses:["Il l'a fait construire","Son epouse Luitgarde y est enterree","Il y a ete couronne","Il y a signe un traite"],bonne_reponse:1,indice:"Cherche du cote de la famille de Charlemagne et de la basilique originale."},
-   narration_reussite:"Bravo ! L'epouse de Charlemagne, Luitgarde, y fut inhumee en 800. D'ou le nom ! Et juste a cote, la Cite de la Creation Mame accueille aujourd'hui des startups et artistes.",
-   narration_echec:"C'est parce que Luitgarde, epouse de Charlemagne, y fut enterree en 800. Fascinant, non ?",
+   narration_arrivee:"La Tour Charlemagne ! 56 metres de haut, vestige de l'ancienne basilique Saint-Martin. A deux pas, la Cite de la Creation Mame accueille startups et artistes !",
+   interaction:{type_interaction:"quiz",question:"Pourquoi la Tour Charlemagne porte-t-elle ce nom ?",reponses:["Il l'a fait construire","Son epouse Luitgarde y est enterree","Il y a ete couronne","Il y a signe un traite"],bonne_reponse:1,indice:"Cherche du cote de la famille de Charlemagne."},
+   narration_reussite:"Bravo ! Luitgarde, epouse de Charlemagne, y fut inhumee en 800 !",
+   narration_echec:"C'est parce que Luitgarde, epouse de Charlemagne, y fut enterree en 800.",
    points:100},
   {ordre:4,lieu_nom:"Rue Colbert",latitude:47.39380,longitude:0.68780,
-   narration_arrivee:"La rue Colbert ! L'une des plus anciennes rues de Tours. Au Moyen Age, c'etait la rue principale. Aujourd'hui le basketteur Ian Mahinmi, ne a Tours, est l'une des fiertes sportives de la ville !",
-   interaction:{type_interaction:"observation",consigne:"Observe les facades des numeros 39 et 41. Tu y trouveras des maisons a pans de bois avec des etages en encorbellement. Combien d'etages depassent ?",indice:"L'encorbellement, c'est quand les etages superieurs depassent par rapport au rez-de-chaussee."},
-   narration_reussite:"Bien observe ! Ces encorbellements sont typiques de l'architecture medievale tourangelle. La rue Colbert est un veritable musee a ciel ouvert !",
+   narration_arrivee:"La rue Colbert ! L'une des plus anciennes rues de Tours. Le basketteur Ian Mahinmi, ne a Tours, est l'une des fiertes sportives de la ville !",
+   interaction:{type_interaction:"observation",consigne:"Observe les facades des numeros 39 et 41. Combien d'etages en encorbellement peux-tu compter ?",indice:"L'encorbellement, c'est quand les etages superieurs depassent par rapport au rez-de-chaussee."},
+   narration_reussite:"Bien observe ! Ces encorbellements sont typiques de l'architecture medievale tourangelle.",
    narration_echec:"L'encorbellement est un detail subtil. Tu le repereras mieux la prochaine fois !",
    points:100},
   {ordre:5,lieu_nom:"Place Chateauneuf",latitude:47.39420,longitude:0.68600,
-   narration_arrivee:"Derniere etape : la Place Chateauneuf ! Ici se dressait la puissante basilique Saint-Martin, lieu de pelerinage majeur. Savais-tu que l'entreprise Tupperware avait son siege europeen a Tours pendant des decennies ?",
-   interaction:{type_interaction:"quiz",question:"Saint Martin de Tours est celebre pour un geste legendaire. Lequel ?",reponses:["Il a construit la cathedrale","Il a partage son manteau avec un mendiant","Il a fonde l'universite","Il a repousse les Vikings"],bonne_reponse:1,indice:"C'est un geste de generosite devenu un symbole universel de partage."},
-   narration_reussite:"Parfait ! Le partage du manteau est l'un des gestes les plus celebres de l'histoire de France. Bravo aventurier !",
-   narration_echec:"Saint Martin a partage son manteau avec un mendiant. Un geste devenu legendaire !",
+   narration_arrivee:"Derniere etape : Place Chateauneuf ! Ici se dressait la basilique Saint-Martin, lieu de pelerinage majeur. Tupperware avait son siege europeen a Tours pendant des decennies !",
+   interaction:{type_interaction:"quiz",question:"Saint Martin de Tours est celebre pour quel geste legendaire ?",reponses:["Il a construit la cathedrale","Il a partage son manteau avec un mendiant","Il a fonde l'universite","Il a repousse les Vikings"],bonne_reponse:1,indice:"Un geste de generosite devenu symbole universel de partage."},
+   narration_reussite:"Parfait ! Le partage du manteau est l'un des gestes les plus celebres de l'histoire de France !",
+   narration_echec:"Saint Martin a partage son manteau avec un mendiant. Un geste legendaire !",
    points:100}
  ],
- conclusion:"Felicitations ! Tu as perce les secrets du Vieux Tours comme un vrai explorateur. Moonsky est super fier de toi ! A bientot pour de nouvelles aventures !"
+ conclusion:"Felicitations ! Tu as perce les secrets du Vieux Tours comme un vrai explorateur. Moonsky est super fier de toi !"
 };
 
 var map,markers=[],polyline,parcours=null,step=0,score=0,loaded=false;
@@ -209,6 +312,21 @@ var voiceOn=true;
 
 map=L.map('map',{center:[47.3942,0.6885],zoom:16,zoomControl:false});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'OpenStreetMap'}).addTo(map);
+
+// ===== PARTICLES =====
+function createParticles(){
+    var ls=document.getElementById('loading-screen');
+    for(var i=0;i<20;i++){
+        var p=document.createElement('div');p.className='particle';
+        var size=Math.random()*4+2;
+        p.style.width=size+'px';p.style.height=size+'px';
+        p.style.left=Math.random()*100+'%';
+        p.style.background='rgba('+(Math.random()>.5?'102,126,234':'118,75,162')+','+(Math.random()*.5+.3)+')';
+        p.style.animationDuration=(Math.random()*8+6)+'s';
+        p.style.animationDelay=(Math.random()*5)+'s';
+        ls.appendChild(p);
+    }
+}
 
 function enc(s){return encodeURIComponent(s)}
 function getP(){var p=JSON.parse(JSON.stringify(DEFAULTS));try{new URLSearchParams(location.search).forEach(function(v,k){if(v)p[k]=v})}catch(e){}try{if(location.hash){new URLSearchParams(location.hash.substring(1)).forEach(function(v,k){if(v)p[k]=v})}}catch(e){}return p}
@@ -225,29 +343,43 @@ function parse(r){if(typeof r==='object'&&r)return norm(r);if(typeof r==='string
 function norm(d){if(d.parcours)d=d.parcours;if(d.route)d=d.route;if(d.result){if(typeof d.result==='string'){try{d=JSON.parse(d.result)}catch(e){return null}}else d=d.result}if(!d.etapes&&d.waypoints)d.etapes=d.waypoints;if(!d.etapes&&d.steps)d.etapes=d.steps;if(d.etapes&&Array.isArray(d.etapes)){d.etapes=d.etapes.map(function(e,i){return{ordre:e.ordre||(i+1),lieu_nom:e.lieu_nom||e.name||e.lieu||e.title||('Etape '+(i+1)),latitude:parseFloat(e.latitude||e.lat),longitude:parseFloat(e.longitude||e.lng||e.lon),narration_arrivee:e.narration_arrivee||e.narration||e.description||'',interaction:normI(e.interaction||e),narration_reussite:e.narration_reussite||e.success_text||'Bravo !',narration_echec:e.narration_echec||e.failure_text||'Pas tout a fait...',points:e.points||100}})}return d}
 function normI(i){if(!i)return{type_interaction:'observation',consigne:'Observe bien cet endroit !'};if(i.type_interaction)return i;if(i.question&&i.reponses)return{type_interaction:'quiz',question:i.question,reponses:i.reponses,bonne_reponse:i.bonne_reponse||0,indice:i.indice||''};if(i.consigne)return{type_interaction:i.type||'observation',consigne:i.consigne,indice:i.indice||''};return{type_interaction:'observation',consigne:'Observe bien cet endroit !'}}
 
-function ico(n,a){return L.divIcon({className:'x',iconSize:[38,38],iconAnchor:[19,19],html:'<div style="width:38px;height:38px;border-radius:50%;background:'+(a?'linear-gradient(135deg,#667eea,#764ba2)':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;box-shadow:0 2px 12px rgba(0,0,0,.35);border:3px solid #fff;font-family:Nunito,sans-serif">'+n+'</div>'})}
-function doneIco(){return L.divIcon({className:'x',iconSize:[38,38],iconAnchor:[19,19],html:'<div style="width:38px;height:38px;border-radius:50%;background:#28a745;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;box-shadow:0 2px 12px rgba(0,0,0,.35);border:3px solid #fff">&#10003;</div>'})}
+function ico(n,a){return L.divIcon({className:'x',iconSize:[42,42],iconAnchor:[21,21],html:'<div style="width:42px;height:42px;border-radius:50%;background:'+(a?'linear-gradient(135deg,#667eea,#764ba2)':'rgba(180,180,200,.7)')+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;box-shadow:0 3px 16px rgba(0,0,0,.35);border:3px solid #fff;font-family:Nunito,sans-serif">'+n+'</div>'})}
+function doneIco(){return L.divIcon({className:'x',iconSize:[42,42],iconAnchor:[21,21],html:'<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#28a745,#20c997);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;box-shadow:0 3px 16px rgba(0,0,0,.35);border:3px solid #fff"><i class=\'fa-solid fa-check\'></i></div>'})}
 
-// ===== MOONSKY PARLE (texte + voix) =====
+function getLieuImg(nom){return LIEU_IMAGES[nom]||LIEU_IMAGES['default']}
+
+// ===== ELEVENLABS TTS =====
+function speakEL(txt,cb){
+    if(!ELEVENLABS_KEY||!voiceOn){if(cb)cb();return}
+    var audio=document.getElementById('tts-audio');
+    audio.pause();
+    fetch('https://api.elevenlabs.io/v1/text-to-speech/'+ELEVENLABS_VOICE,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','xi-api-key':ELEVENLABS_KEY},
+        body:JSON.stringify({text:txt,model_id:'eleven_multilingual_v2',voice_settings:{stability:0.5,similarity_boost:0.75}})
+    }).then(function(r){if(!r.ok)throw new Error();return r.blob()}).then(function(b){
+        var u=URL.createObjectURL(b);
+        audio.src=u;
+        audio.play().catch(function(){});
+        audio.onended=function(){URL.revokeObjectURL(u);if(cb)cb()};
+    }).catch(function(){if(cb)cb()});
+}
+
+function stopAudio(){var a=document.getElementById('tts-audio');a.pause();a.currentTime=0}
+
 function speak(id,txt,cb){
     var el=document.getElementById(id);if(!el)return;el.textContent='';
-    if(voiceOn&&'speechSynthesis' in window){
-        window.speechSynthesis.cancel();
-        var u=new SpeechSynthesisUtterance(txt);
-        u.lang='fr-FR';u.rate=1.05;u.pitch=1.1;
-        var voices=window.speechSynthesis.getVoices();
-        for(var v=0;v<voices.length;v++){if(voices[v].lang.indexOf('fr')===0){u.voice=voices[v];break}}
-        window.speechSynthesis.speak(u);
-    }
+    speakEL(txt);
     var i=0,sp=22;
     (function t(){if(i<txt.length){el.textContent+=txt.charAt(i);i++;setTimeout(t,sp)}else{if(cb)cb()}})();
 }
 
 function toggleVoice(e){
     e.stopPropagation();voiceOn=!voiceOn;
-    document.getElementById('voiceToggle').textContent=voiceOn?'\u{1F50A}':'\u{1F507}';
-    document.getElementById('voiceToggle').classList.toggle('muted',!voiceOn);
-    if(!voiceOn&&'speechSynthesis' in window)window.speechSynthesis.cancel();
+    var btn=document.getElementById('voiceToggle');
+    btn.innerHTML=voiceOn?'<i class="fa-solid fa-volume-high"></i>':'<i class="fa-solid fa-volume-xmark"></i>';
+    btn.classList.toggle('muted',!voiceOn);
+    if(!voiceOn)stopAudio();
 }
 
 // ===== LOAD PARCOURS =====
@@ -258,6 +390,7 @@ function load(data,ai){
     document.getElementById('score-value').textContent='0';
     if(parcours.titre){var t=document.getElementById('route-title');t.textContent=parcours.titre;t.style.display='block'}
     document.getElementById('score-badge').style.display='block';
+    document.getElementById('bottom-nav').style.display='block';
     if(ai)document.getElementById('ai-badge').style.display='block';
     markers.forEach(function(m){map.removeLayer(m)});markers=[];
     if(polyline)map.removeLayer(polyline);
@@ -266,21 +399,22 @@ function load(data,ai){
         var la=parseFloat(e.latitude),lo=parseFloat(e.longitude);if(isNaN(la)||isNaN(lo))return;
         var p=[la,lo];ll.push(p);
         var m=L.marker(p,{icon:ico(i+1,i===0)}).addTo(map);
-        m.bindTooltip(e.lieu_nom,{permanent:false,direction:'top',offset:[0,-24],className:'tooltip-custom'});
+        m.bindTooltip(e.lieu_nom,{permanent:false,direction:'top',offset:[0,-26]});
         (function(idx){m.on('click',function(){step=idx;updInfo(idx)})})(i);
         markers.push(m);
     });
     if(!ll.length)return;
-    polyline=L.polyline(ll,{color:'#667eea',weight:4,opacity:.7,dashArray:'8,8'}).addTo(map);
+    polyline=L.polyline(ll,{color:'#667eea',weight:4,opacity:.7,dashArray:'10,8'}).addTo(map);
     map.fitBounds(L.latLngBounds(ll).pad(.15));
     updInfo(0);
 }
 
 function updInfo(i){
     var e=parcours.etapes[i],ty=(e.interaction.type_interaction||'defi').toUpperCase();
-    if(ty==='QUIZ')ty='QUIZ';else if(ty==='PHOTO')ty='PHOTO';else ty='OBSERVATION';
-    document.getElementById('etape-info-title').textContent='Etape '+(i+1)+'/'+parcours.etapes.length+' - '+e.lieu_nom;
-    document.getElementById('etape-info-subtitle').textContent=ty+' - Appuyer pour voir';
+    var icon='fa-gamepad';
+    if(ty==='QUIZ'){ty='QUIZ';icon='fa-brain'}else if(ty==='PHOTO'){ty='PHOTO';icon='fa-camera'}else{ty='OBSERVATION';icon='fa-eye'}
+    document.getElementById('etape-info-title').textContent='Etape '+(i+1)+'/'+parcours.etapes.length+' — '+e.lieu_nom;
+    document.getElementById('etape-info-subtitle').innerHTML='<i class="fa-solid '+icon+'"></i> '+ty+' — Appuyer pour voir';
     document.getElementById('etape-info').style.display='block';
 }
 
@@ -291,6 +425,7 @@ function openEtape(){
     showScr('scr-intro');
     document.getElementById('intro-badge').textContent='ETAPE '+(step+1)+'/'+parcours.etapes.length;
     document.getElementById('intro-lieu').textContent=e.lieu_nom;
+    document.getElementById('intro-bg').style.backgroundImage='url('+getLieuImg(e.lieu_nom)+')';
     document.getElementById('overlay').style.display='flex';
     document.getElementById('overlay').scrollTop=0;
     speak('intro-bubble',e.narration_arrivee);
@@ -299,13 +434,19 @@ function openEtape(){
 }
 
 function showDefi(){
-    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+    stopAudio();
     var e=parcours.etapes[step],ty=(e.interaction.type_interaction||'observation').toLowerCase();
     if(ty==='quiz')doQuiz(e);else doPhoto(e);
 }
 
 function doQuiz(e){
     showScr('scr-quiz');
+    // Set background image
+    document.getElementById('quiz-bg').style.backgroundImage='url('+getLieuImg(e.lieu_nom)+')';
+    // Try video background
+    var vid=document.getElementById('quiz-video');
+    var vUrl=QUIZ_VIDEOS[vidIdx%QUIZ_VIDEOS.length];vidIdx++;
+    vid.src=vUrl;vid.play().catch(function(){});
     document.getElementById('quiz-q').textContent=e.interaction.question||e.interaction.consigne||'Question...';
     document.getElementById('quiz-hint').textContent=(e.interaction.indice||'Observe bien autour de toi !');
     document.getElementById('quiz-hint').style.display='none';
@@ -325,15 +466,17 @@ function doQuiz(e){
 function doPhoto(e){
     showScr('scr-photo');
     var ty=(e.interaction.type_interaction||'observation').toLowerCase();
-    document.getElementById('photo-badge').textContent=ty==='photo'?'DEFI PHOTO':'OBSERVATION';
+    document.getElementById('photo-badge').innerHTML=ty==='photo'?'<i class="fa-solid fa-camera"></i> DEFI PHOTO':'<i class="fa-solid fa-eye"></i> OBSERVATION';
+    document.getElementById('photo-bg').style.backgroundImage='url('+getLieuImg(e.lieu_nom)+')';
     document.getElementById('photo-txt').textContent=e.interaction.consigne||e.interaction.question||'Observe bien cet endroit !';
     speak('photo-bubble',e.interaction.indice||'Prends ton temps et observe bien !');
 }
-function photoOk(){if('speechSynthesis' in window)window.speechSynthesis.cancel();result(true,parcours.etapes[step])}
+function photoOk(){stopAudio();result(true,parcours.etapes[step])}
 function toggleHint(){var h=document.getElementById('quiz-hint');h.style.display=h.style.display==='none'?'block':'none'}
 
 function result(ok,e){
-    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+    stopAudio();
+    var vid=document.getElementById('quiz-video');vid.pause();
     showScr('scr-result');
     var pts=ok?(e.points||100):0;score+=pts;
     document.getElementById('score-value').textContent=score;
@@ -344,11 +487,11 @@ function result(ok,e){
     speak('r-bubble',ok?e.narration_reussite:e.narration_echec);
     if(step<markers.length)markers[step].setIcon(doneIco());
     var last=step>=parcours.etapes.length-1;
-    document.getElementById('btn-next').textContent=last?'Resultat final':'Etape suivante';
+    document.getElementById('btn-next').innerHTML=last?'Resultat final <i class="fa-solid fa-trophy"></i>':'Etape suivante <i class="fa-solid fa-arrow-right"></i>';
 }
 
 function nextStep(){
-    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+    stopAudio();
     if(step>=parcours.etapes.length-1){showEnd();return}
     step++;
     document.getElementById('overlay').style.display='none';
@@ -365,55 +508,43 @@ function showEnd(){
     speak('end-bubble',parcours.conclusion||'Bravo aventurier ! Tu as termine ce parcours avec brio !');
 }
 function backToMap(){
-    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+    stopAudio();
     document.getElementById('overlay').style.display='none';
     document.getElementById('etape-info').style.display='none';
     var ll=parcours.etapes.map(function(e){return[e.latitude,e.longitude]});
     map.fitBounds(L.latLngBounds(ll).pad(.15));
 }
 
-if('speechSynthesis' in window){window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices()}}
+// ===== NAV BAR =====
+function setActiveNav(idx){document.querySelectorAll('.nav-item').forEach(function(n,i){n.classList.toggle('active',i===idx)})}
+function navMap(){setActiveNav(0);document.getElementById('overlay').style.display='none';if(parcours){var ll=parcours.etapes.map(function(e){return[e.latitude,e.longitude]});map.fitBounds(L.latLngBounds(ll).pad(.15))}}
+function navHistory(){setActiveNav(1);alert('Historique des parcours - Bientot disponible !')}
+function navShare(){setActiveNav(2);document.getElementById('share-modal').style.display='flex'}
+function navFavoris(){setActiveNav(3);alert('Favoris - Bientot disponible !')}
+function navProfil(){setActiveNav(4);alert('Profil - Bientot disponible !')}
 
-// ===== LOADING SCREEN FUN =====
-var LD_PHRASES=[
-    "Je fouille dans mes archives secretes...",
-    "Je demande aux pigeons locaux les meilleurs spots...",
-    "Je negocie avec l'IA pour des enigmes de folie...",
-    "Je verifie que les fantomes du quartier sont cool...",
-    "Je calcule l'itineraire parfait pour tes pattes...",
-    "Je prepare des defis qui vont te surprendre...",
-    "Patience, la magie opere...",
-    "Je consulte les anciens de la ville...",
-    "Encore quelques secondes, ca va etre genial !",
-    "Je cache des indices un peu partout..."
-];
+// ===== SHARE =====
+function getShareTxt(){return 'Je viens de terminer un parcours Explozill'+(parcours?' : '+parcours.titre:'')+' avec '+score+' points ! Tente ta chance : https://explozill.com'}
+function shareWA(){window.open('https://wa.me/?text='+enc(getShareTxt()))}
+function shareFB(){window.open('https://www.facebook.com/sharer/sharer.php?quote='+enc(getShareTxt()))}
+function shareTW(){window.open('https://twitter.com/intent/tweet?text='+enc(getShareTxt()))}
+function shareIG(){alert('Copie le texte et partage sur Instagram !\n\n'+getShareTxt())}
+function shareTK(){alert('Copie le texte et partage sur TikTok !\n\n'+getShareTxt())}
+function shareSN(){alert('Copie le texte et partage sur Snapchat !\n\n'+getShareTxt())}
+function copyLink(){navigator.clipboard.writeText(getShareTxt()).then(function(){alert('Copie !')}).catch(function(){alert(getShareTxt())})}
+function shareMail(){window.open('mailto:?subject=Mon aventure Explozill&body='+enc(getShareTxt()))}
+function closeShare(e){document.getElementById('share-modal').style.display='none';setActiveNav(0)}
+
+// ===== LOADING =====
+var LD_PHRASES=["Je fouille dans mes archives secretes...","Je demande aux pigeons locaux les meilleurs spots...","Je negocie avec l'IA pour des enigmes de folie...","Je verifie que les fantomes du quartier sont cool...","Je calcule l'itineraire parfait pour tes pattes...","Je prepare des defis qui vont te surprendre...","Patience, la magie opere...","Je consulte les anciens de la ville...","Encore quelques secondes, ca va etre genial !","Je cache des indices un peu partout..."];
 var ldIdx=0,ldTimer=null;
-
-function startLoading(){
-    var p=getP();
-    var el=document.getElementById('ld-city');
-    if(el)el.textContent=p.ville||'Tours';
-    typeLd();
-    ldTimer=setInterval(typeLd,3500);
-}
-
-function typeLd(){
-    var el=document.getElementById('ld-bubble');if(!el)return;
-    var txt=LD_PHRASES[ldIdx%LD_PHRASES.length];ldIdx++;
-    el.textContent='';
-    var i=0;
-    (function t(){if(i<txt.length){el.textContent+=txt.charAt(i);i++;setTimeout(t,28)}})();
-}
-
-function hideLoading(){
-    if(ldTimer)clearInterval(ldTimer);
-    var ls=document.getElementById('loading-screen');
-    if(ls){ls.classList.add('hide');setTimeout(function(){ls.style.display='none'},600)}
-}
+function startLoading(){var p=getP();var el=document.getElementById('ld-city');if(el)el.textContent=p.ville||'Tours';createParticles();typeLd();ldTimer=setInterval(typeLd,3500)}
+function typeLd(){var el=document.getElementById('ld-bubble');if(!el)return;var txt=LD_PHRASES[ldIdx%LD_PHRASES.length];ldIdx++;el.textContent='';var i=0;(function t(){if(i<txt.length){el.textContent+=txt.charAt(i);i++;setTimeout(t,28)}})()}
+function hideLoading(){if(ldTimer)clearInterval(ldTimer);var ls=document.getElementById('loading-screen');if(ls){ls.classList.add('hide');setTimeout(function(){ls.style.display='none'},800)}}
 
 // ===== START =====
 (function(){
-    console.log('[Explozill] v8 final');
+    console.log('[Explozill] v10 Visual Wahou + Charlie + Share + Images');
     startLoading();
     var done=false;
     var t=setTimeout(function(){if(!done){done=true;hideLoading();load(DEMO,false)}},45000);
