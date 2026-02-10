@@ -254,18 +254,17 @@ var DEFAULTS={duree:'Expresso',mobilite:'A pied',theme:'Decouverte',pauses:'Non'
 var ELEVENLABS_KEY='sk_4784ea31bef32f99e800809c55c5e3ddf5c5602f2a3f0797';
 var ELEVENLABS_VOICE='IKne3meq5aSn9XLyUdCD'; // Charlie
 
-// ===== IMAGES LIEUX (Unsplash libre de droit) =====
-var LIEU_IMAGES={
-    'default':'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
-    'Place Plumereau':'https://images.unsplash.com/photo-1568684333877-4d39f2f5b3c0?w=800&q=80',
-    'Rue du Grand Marche':'https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=800&q=80',
-    'Tour Charlemagne':'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&q=80',
-    'Rue Colbert':'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
-    'Place Chateauneuf':'https://images.unsplash.com/photo-1555990793-da11153b2473?w=800&q=80'
+// ===== FONDS DEGRADES PAR LIEU =====
+// Dégradés stylisés par étape (pas de fausses images)
+var LIEU_GRADIENTS={
+    'default':'linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%)',
+    'Place Plumereau':'linear-gradient(135deg,#2d1b69 0%,#11998e 100%)',
+    'Rue du Grand Marche':'linear-gradient(135deg,#1a1a2e 0%,#e94560 100%)',
+    'Tour Charlemagne':'linear-gradient(135deg,#0f3460 0%,#533483 50%,#e94560 100%)',
+    'Rue Colbert':'linear-gradient(135deg,#16213e 0%,#1a1a2e 40%,#e94560 100%)',
+    'Place Chateauneuf':'linear-gradient(135deg,#533483 0%,#0f3460 50%,#11998e 100%)'
 };
-// Videos libres de droit pour quiz
-var QUIZ_VIDEOS=['https://cdn.pixabay.com/video/2020/05/25/39831-424930032_large.mp4','https://cdn.pixabay.com/video/2019/06/21/24632-343700032_large.mp4','https://cdn.pixabay.com/video/2024/02/14/200712-912879254_large.mp4'];
-var vidIdx=0;
+
 
 // ===== PARCOURS DEMO =====
 var DEMO={
@@ -346,7 +345,7 @@ function normI(i){if(!i)return{type_interaction:'observation',consigne:'Observe 
 function ico(n,a){return L.divIcon({className:'x',iconSize:[42,42],iconAnchor:[21,21],html:'<div style="width:42px;height:42px;border-radius:50%;background:'+(a?'linear-gradient(135deg,#667eea,#764ba2)':'rgba(180,180,200,.7)')+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;box-shadow:0 3px 16px rgba(0,0,0,.35);border:3px solid #fff;font-family:Nunito,sans-serif">'+n+'</div>'})}
 function doneIco(){return L.divIcon({className:'x',iconSize:[42,42],iconAnchor:[21,21],html:'<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#28a745,#20c997);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;box-shadow:0 3px 16px rgba(0,0,0,.35);border:3px solid #fff"><i class=\'fa-solid fa-check\'></i></div>'})}
 
-function getLieuImg(nom){return LIEU_IMAGES[nom]||LIEU_IMAGES['default']}
+function getLieuGrad(nom){return LIEU_GRADIENTS[nom]||LIEU_GRADIENTS['default']}
 
 // ===== ELEVENLABS TTS =====
 function speakEL(txt,cb){
@@ -425,7 +424,7 @@ function openEtape(){
     showScr('scr-intro');
     document.getElementById('intro-badge').textContent='ETAPE '+(step+1)+'/'+parcours.etapes.length;
     document.getElementById('intro-lieu').textContent=e.lieu_nom;
-    document.getElementById('intro-bg').style.backgroundImage='url('+getLieuImg(e.lieu_nom)+')';
+    document.getElementById('intro-bg').style.background=getLieuGrad(e.lieu_nom);
     document.getElementById('overlay').style.display='flex';
     document.getElementById('overlay').scrollTop=0;
     speak('intro-bubble',e.narration_arrivee);
@@ -441,12 +440,8 @@ function showDefi(){
 
 function doQuiz(e){
     showScr('scr-quiz');
-    // Set background image
-    document.getElementById('quiz-bg').style.backgroundImage='url('+getLieuImg(e.lieu_nom)+')';
-    // Try video background
-    var vid=document.getElementById('quiz-video');
-    var vUrl=QUIZ_VIDEOS[vidIdx%QUIZ_VIDEOS.length];vidIdx++;
-    vid.src=vUrl;vid.play().catch(function(){});
+    document.getElementById('quiz-bg').style.background=getLieuGrad(e.lieu_nom);
+
     document.getElementById('quiz-q').textContent=e.interaction.question||e.interaction.consigne||'Question...';
     document.getElementById('quiz-hint').textContent=(e.interaction.indice||'Observe bien autour de toi !');
     document.getElementById('quiz-hint').style.display='none';
@@ -467,7 +462,7 @@ function doPhoto(e){
     showScr('scr-photo');
     var ty=(e.interaction.type_interaction||'observation').toLowerCase();
     document.getElementById('photo-badge').innerHTML=ty==='photo'?'<i class="fa-solid fa-camera"></i> DEFI PHOTO':'<i class="fa-solid fa-eye"></i> OBSERVATION';
-    document.getElementById('photo-bg').style.backgroundImage='url('+getLieuImg(e.lieu_nom)+')';
+    document.getElementById('photo-bg').style.background=getLieuGrad(e.lieu_nom);
     document.getElementById('photo-txt').textContent=e.interaction.consigne||e.interaction.question||'Observe bien cet endroit !';
     speak('photo-bubble',e.interaction.indice||'Prends ton temps et observe bien !');
 }
