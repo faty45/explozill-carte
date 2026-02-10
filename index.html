@@ -12,166 +12,24 @@
         html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         #map { width: 100%; height: 100%; z-index: 1; }
 
-        /* Écran de chargement */
-        #loading-screen {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            z-index: 3000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            transition: opacity 0.8s ease;
-        }
-        #loading-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .loading-fox {
-            font-size: 60px;
-            margin-bottom: 20px;
-            animation: bounce 1s infinite alternate;
-        }
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-15px); }
-        }
-        .loading-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        .loading-subtitle {
-            font-size: 14px;
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 30px;
-            text-align: center;
-            padding: 0 40px;
-        }
-        .loading-bar-container {
-            width: 200px;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-        .loading-bar {
-            height: 100%;
-            width: 30%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 2px;
-            animation: loading 1.5s infinite ease-in-out;
-        }
-        @keyframes loading {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(400%); }
-        }
-        .loading-status {
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-        }
-
-        /* Panneau d'étape */
-        #panel {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-            z-index: 1000;
-            max-height: 55%;
-            overflow-y: auto;
-            padding: 20px;
-            transition: transform 0.3s ease;
-        }
-        #panel.visible { display: block; }
-        #panel-handle {
-            width: 40px; height: 4px;
-            background: #ccc; border-radius: 2px;
-            margin: 0 auto 15px;
-        }
-        #panel-titre {
-            font-size: 16px; font-weight: 700;
-            color: #1a1a2e; margin-bottom: 8px;
-        }
-        #panel-narration {
-            font-size: 13px; color: #555;
-            line-height: 1.5; margin-bottom: 15px;
-            font-style: italic;
-        }
-        #panel-interaction {
-            background: #f0f4ff;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        #panel-interaction-type {
-            font-size: 11px; font-weight: 600;
-            color: #667eea; text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        #panel-interaction-content {
-            font-size: 14px; color: #333;
-            line-height: 1.5;
-        }
-        .quiz-btn {
-            display: block; width: 100%;
-            padding: 12px; margin: 6px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            background: white;
-            font-size: 14px; color: #333;
-            text-align: left;
-            cursor: pointer;
-        }
-        .quiz-btn:active { background: #f0f4ff; border-color: #667eea; }
-        .quiz-btn.correct { background: #d4edda; border-color: #28a745; color: #155724; }
-        .quiz-btn.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
-
-        #btn-valider {
-            display: none;
-            width: 100%; padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; border: none;
-            border-radius: 12px;
-            font-size: 15px; font-weight: 600;
-            cursor: pointer;
-        }
-        #panel-points {
-            text-align: center;
-            font-size: 13px; color: #667eea;
-            font-weight: 600; margin-top: 10px;
-        }
-        #panel-close {
-            position: absolute; top: 15px; right: 15px;
-            background: none; border: none;
-            font-size: 20px; color: #999; cursor: pointer;
-        }
-
         /* Score flottant */
         #score-badge {
-            position: fixed; top: 15px; right: 15px;
+            position: fixed; top: 10px; right: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; padding: 8px 15px;
-            border-radius: 20px; z-index: 1000;
-            font-size: 13px; font-weight: 600;
+            color: white; padding: 6px 12px;
+            border-radius: 16px; z-index: 1000;
+            font-size: 12px; font-weight: 600;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             display: none;
         }
 
         /* Titre du parcours */
         #route-title {
-            position: fixed; top: 15px; left: 15px; right: 100px;
+            position: fixed; top: 10px; left: 10px; right: 90px;
             background: rgba(255,255,255,0.95);
-            padding: 8px 15px;
-            border-radius: 12px; z-index: 1000;
-            font-size: 13px; font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 10px; z-index: 1000;
+            font-size: 12px; font-weight: 600;
             color: #1a1a2e;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             display: none;
@@ -180,110 +38,51 @@
             text-overflow: ellipsis;
         }
 
-        /* Badge IA */
-        #ai-badge {
-            position: fixed; top: 55px; left: 15px;
-            background: rgba(102,126,234,0.9);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 8px; z-index: 1000;
-            font-size: 10px; font-weight: 600;
-            display: none;
-            letter-spacing: 0.5px;
-        }
-
-        /* Bouton étape suivante */
-        #btn-next {
-            display: none;
-            position: fixed; bottom: 20px; left: 20px; right: 20px;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; border: none;
-            border-radius: 12px;
-            font-size: 15px; font-weight: 600;
-            cursor: pointer; z-index: 999;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
-        }
-
-        /* Message de fin */
-        #conclusion-panel {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        #conclusion-panel.visible { display: flex; }
-        #conclusion-content {
+        /* Info bulle étape active */
+        #etape-info {
+            position: fixed; bottom: 15px; left: 15px; right: 15px;
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px;
-            text-align: center;
-            max-width: 350px;
+            border-radius: 14px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 999;
+            display: none;
+            cursor: pointer;
         }
-        #conclusion-content h2 {
-            font-size: 20px; color: #1a1a2e;
-            margin-bottom: 10px;
+        #etape-info-title {
+            font-size: 13px; font-weight: 700;
+            color: #1a1a2e; margin-bottom: 3px;
         }
-        #conclusion-content p {
-            font-size: 14px; color: #555;
-            line-height: 1.6; margin-bottom: 20px;
+        #etape-info-subtitle {
+            font-size: 11px; color: #667eea;
         }
-        #conclusion-score {
-            font-size: 28px; font-weight: 700;
-            color: #667eea; margin-bottom: 15px;
+        #etape-info-arrow {
+            position: absolute; right: 16px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px; color: #667eea;
         }
     </style>
 </head>
 <body>
 
-<!-- Écran de chargement -->
-<div id="loading-screen">
-    <div class="loading-fox">🦊</div>
-    <div class="loading-title">Explozill</div>
-    <div class="loading-subtitle" id="loading-msg">Notre IA prépare votre parcours personnalisé...</div>
-    <div class="loading-bar-container">
-        <div class="loading-bar"></div>
-    </div>
-    <div class="loading-status" id="loading-status">Génération en cours...</div>
-</div>
-
 <div id="map"></div>
 <div id="route-title"></div>
-<div id="ai-badge">✨ GÉNÉRÉ PAR IA</div>
-<div id="score-badge">🦊 Score : <span id="score-value">0</span> pts</div>
+<div id="score-badge">Score : <span id="score-value">0</span> pts</div>
 
-<div id="panel">
-    <button id="panel-close">&times;</button>
-    <div id="panel-handle"></div>
-    <div id="panel-titre"></div>
-    <div id="panel-narration"></div>
-    <div id="panel-interaction">
-        <div id="panel-interaction-type"></div>
-        <div id="panel-interaction-content"></div>
-    </div>
-    <button id="btn-valider">Valider</button>
-    <div id="panel-points"></div>
-</div>
-
-<button id="btn-next">Étape suivante →</button>
-
-<div id="conclusion-panel">
-    <div id="conclusion-content">
-        <h2>🦊 Parcours terminé !</h2>
-        <div id="conclusion-score"></div>
-        <p id="conclusion-text"></p>
-    </div>
+<!-- Info bulle en bas : indique l'étape active, clic = envoie à PandaSuite -->
+<div id="etape-info" onclick="openEtapeInPandaSuite()">
+    <div id="etape-info-title"></div>
+    <div id="etape-info-subtitle">APPUYER ICI POUR COMMENCER →</div>
+    <div id="etape-info-arrow">›</div>
 </div>
 
 <script>
 // ============================================================
 // EXPLOZILL - CARTE INTERACTIVE
 // Version: Démo CCI37 Tours - 10 février 2026
-// Mode: Parcours démo pré-chargé + appel webhook en parallèle
+// Mode: Carte GPS + envoi données vers PandaSuite via Bridge
+// PAS de loading screen (PandaSuite gère l'écran de chargement)
+// PAS de renard (Moonsky est dans PandaSuite)
 // ============================================================
 
 // === CONFIGURATION ===
@@ -302,72 +101,86 @@ var DEFAULT_PARAMS = {
     lng: '0.6885'
 };
 
-// === PARCOURS DE DÉMO PRÉ-CHARGÉ ===
-// Généré par OpenAI via Make.com le 07/02/2026
+// === PARCOURS DE DÉMO PRÉ-CHARGÉ (filet de sécurité si webhook échoue) ===
 var DEMO_PARCOURS = {
     "titre": "Flash Tour(s) : les pierres parlent vite",
-    "conclusion": "Bravo, explorateur éclair ! En quelques minutes, vous avez traversé des siècles d'histoire tourangelle. De la place Plumereau à la cathédrale Saint-Gatien, les pierres vous ont murmuré leurs secrets. Revenez bientôt pour un parcours plus long !",
+    "ville": "Tours",
+    "type_scenario": "Jeu de piste",
+    "introduction": "Bienvenue à Tours. Je suis Moonsky, ton renard cyber-futuriste. On va explorer le Vieux Tours ensemble. Garde ton smartphone prêt, on va observer, capturer et décoder le réel.",
     "etapes": [
         {
             "ordre": 1,
             "lieu_nom": "Place Plumereau",
             "latitude": 47.3948,
             "longitude": 0.6833,
-            "narration_arrivee": "Bienvenue sur la place Plumereau, le cœur battant du Vieux Tours ! Autour de vous, des maisons à colombages des XVe et XVIe siècles racontent l'histoire médiévale de la ville. Jadis place du marché, elle est aujourd'hui le lieu de rendez-vous préféré des Tourangeaux.",
+            "narration_arrivee": "Te voilà sur la Place Plumereau, cœur vibrant du Vieux Tours. Regarde autour : façades à colombages, terrasses, petits détails qui racontent des siècles. On commence soft, mais précis.",
             "interaction": {
                 "type_interaction": "quiz",
-                "question": "Combien de maisons à colombages classées entourent la place Plumereau ?",
-                "reponses": ["5", "8", "12", "15"],
-                "bonne_reponse": 2,
-                "indice": "Regardez bien autour de vous, comptez les façades à pans de bois..."
+                "question": "En levant les yeux autour de la place, combien de maisons à colombages peux-tu repérer ?",
+                "reponses": ["8", "12", "15", "20"],
+                "bonne_reponse": 1,
+                "indice": "Concentre-toi sur les façades avec des poutres en bois visibles."
             },
-            "narration_reussite": "Excellent ! On compte environ 12 maisons à colombages classées autour de cette place emblématique.",
-            "narration_echec": "Pas tout à fait ! On dénombre environ 12 maisons à colombages classées sur cette place historique.",
+            "narration_reussite": "Bien vu ! Ton regard d'aventurier capte la géométrie cachée du décor.",
+            "narration_echec": "Pas grave. Recalibre ton œil, la suite t'attend.",
             "points": 100
         },
         {
             "ordre": 2,
             "lieu_nom": "Cathédrale Saint-Gatien",
-            "latitude": 47.3966,
-            "longitude": 0.6956,
-            "narration_arrivee": "Vous voici devant la majestueuse cathédrale Saint-Gatien ! Sa construction a débuté au XIIIe siècle et s'est étalée sur près de 400 ans, ce qui explique le mélange de styles architecturaux, du gothique primitif au gothique flamboyant. Ses deux tours culminent à plus de 60 mètres.",
+            "latitude": 47.3955,
+            "longitude": 0.6944,
+            "narration_arrivee": "La Cathédrale Saint-Gatien se dresse devant toi. Plusieurs siècles de construction ont donné ce mélange de styles unique. Observe bien la façade.",
             "interaction": {
                 "type_interaction": "quiz",
                 "question": "En quelle année a débuté la construction de la cathédrale Saint-Gatien ?",
-                "reponses": ["1170", "1236", "1305", "1412"],
+                "reponses": ["1170", "1236", "1306", "1425"],
                 "bonne_reponse": 1,
-                "indice": "C'est au XIIIe siècle, sous le règne de Saint Louis..."
+                "indice": "C'est au XIIIe siècle, sous le règne de Saint Louis."
             },
-            "narration_reussite": "Bravo ! La construction a bien débuté en 1236, sous l'impulsion de l'archevêque de Tours.",
-            "narration_echec": "C'était 1236 ! La cathédrale a mis près de 4 siècles à être achevée, d'où son mélange de styles.",
+            "narration_reussite": "Exact ! Tu maîtrises l'histoire comme un vrai pisteur urbain.",
+            "narration_echec": "La bonne réponse était 1236. Retiens-la pour la prochaine fois !",
+            "points": 100
+        },
+        {
+            "ordre": 3,
+            "lieu_nom": "Pont Wilson",
+            "latitude": 47.3930,
+            "longitude": 0.6880,
+            "narration_arrivee": "Le Pont Wilson, surnommé le Pont de Pierre, enjambe la Loire avec élégance. C'est l'un des symboles de Tours. Prends un moment pour admirer la vue.",
+            "interaction": {
+                "type_interaction": "photo",
+                "consigne": "Prends une photo du pont avec la Loire en arrière-plan. Essaie de capturer au moins une arche complète.",
+                "indice": "Place-toi sur la rive nord pour avoir le meilleur angle."
+            },
+            "narration_reussite": "Superbe cliché ! Tu as l'œil du photographe urbain.",
+            "narration_echec": "Pas de souci, l'important c'est d'avoir profité de la vue !",
             "points": 100
         }
-    ]
+    ],
+    "conclusion": "Parcours terminé ! Tu as exploré le cœur de Tours avec brio. Reviens quand tu veux, j'ai d'autres secrets à te faire chasser."
 };
 
 // === VARIABLES GLOBALES ===
-var map, parcours, markers = [], polyline;
+var map, markers = [], polyline;
+var parcours = null;
 var currentStep = 0;
 var score = 0;
-var stepCompleted = false;
 var parcoursLoaded = false;
 
 // === INITIALISER LA CARTE ===
 map = L.map('map', {
-    zoomControl: false,
-    attributionControl: false
-}).setView([47.3942, 0.6885], 14);
-
+    center: [47.3942, 0.6885],
+    zoom: 15,
+    zoomControl: false
+});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
+    attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// === LIRE LES PARAMÈTRES URL ===
+// === RÉCUPÉRER LES PARAMÈTRES ===
 function getParams() {
-    var params = {};
-    Object.keys(DEFAULT_PARAMS).forEach(function(key) {
-        params[key] = DEFAULT_PARAMS[key];
-    });
+    var params = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
     var urlParams = new URLSearchParams(window.location.search);
     urlParams.forEach(function(value, key) {
         if (value) params[key] = value;
@@ -398,24 +211,23 @@ function callWebhook(onSuccess) {
 
     console.log('[Explozill] Appel webhook:', url);
 
+    // Informer PandaSuite que le chargement commence
+    try { PandaBridge.send("loading_start", [{ status: "Connexion à l'IA..." }]); } catch(e) {}
+
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
     xhr.timeout = 120000;
 
     xhr.onload = function() {
         console.log('[Explozill] Webhook réponse status:', xhr.status);
-        console.log('[Explozill] Réponse brute:', xhr.responseText.substring(0, 200));
         if (xhr.status === 200 && xhr.responseText && xhr.responseText !== 'Accepted') {
             try {
                 var routeData = parseRouteData(xhr.responseText);
                 if (routeData && routeData.etapes && routeData.etapes.length > 0) {
                     console.log('[Explozill] Parcours IA reçu:', routeData.titre, '-', routeData.etapes.length, 'étapes');
-                    updateLoadingStatus('Parcours prêt !');
+                    try { PandaBridge.send("loading_status", [{ status: "Parcours prêt !" }]); } catch(e) {}
                     if (onSuccess) onSuccess();
-                    setTimeout(function() {
-                        loadParcours(routeData, true);
-                        hideLoading();
-                    }, 500);
+                    loadParcours(routeData, true);
                     return;
                 }
             } catch(e) {
@@ -426,11 +238,13 @@ function callWebhook(onSuccess) {
     };
 
     xhr.onerror = function() {
-        console.log('[Explozill] Webhook injoignable, parcours démo conservé');
+        console.log('[Explozill] Webhook injoignable');
+        try { PandaBridge.send("loading_status", [{ status: "Mode démo" }]); } catch(e) {}
     };
 
     xhr.ontimeout = function() {
-        console.log('[Explozill] Webhook timeout, parcours démo conservé');
+        console.log('[Explozill] Webhook timeout');
+        try { PandaBridge.send("loading_status", [{ status: "Mode démo" }]); } catch(e) {}
     };
 
     xhr.send();
@@ -440,21 +254,15 @@ function callWebhook(onSuccess) {
 function parseRouteData(rawData) {
     if (typeof rawData === 'object' && rawData !== null) return normalizeRouteData(rawData);
     if (typeof rawData === 'string') {
-        // Nettoyer le texte parasite de Make.com
         var str = rawData.trim()
             .replace(/```json\s*/g, '').replace(/```\s*/g, '')
             .replace(/\s*du module OpenAI.*$/s, '')
             .replace(/\s*du module ChatGPT.*$/s, '');
-        try { return normalizeRouteData(JSON.parse(str)); } catch(e) {
-            console.log('[Explozill] Parse direct échoué, tentative extraction JSON...');
-        }
-        // Extraire le JSON entre le premier { et le dernier }
+        try { return normalizeRouteData(JSON.parse(str)); } catch(e) {}
         var jsonStart = str.indexOf('{');
         var jsonEnd = str.lastIndexOf('}');
         if (jsonStart !== -1 && jsonEnd > jsonStart) {
-            try { return normalizeRouteData(JSON.parse(str.substring(jsonStart, jsonEnd + 1))); } catch(e2) {
-                console.log('[Explozill] Extraction JSON échouée aussi');
-            }
+            try { return normalizeRouteData(JSON.parse(str.substring(jsonStart, jsonEnd + 1))); } catch(e2) {}
         }
     }
     return null;
@@ -499,47 +307,36 @@ function normalizeInteraction(inter) {
     return { type_interaction: 'defi', consigne: 'Explorez cet endroit !' };
 }
 
-// === UI LOADING ===
-function updateLoadingStatus(msg) {
-    document.getElementById('loading-status').textContent = msg;
-}
-
-function hideLoading() {
-    var screen = document.getElementById('loading-screen');
-    screen.classList.add('hidden');
-    setTimeout(function() { screen.style.display = 'none'; }, 800);
-}
-
 // === ICÔNES PERSONNALISÉES ===
 function createStepIcon(num, active) {
     return L.divIcon({
         className: 'custom-marker',
-        html: '<div style="width:36px;height:36px;border-radius:50%;background:'
+        html: '<div style="width:34px;height:34px;border-radius:50%;background:'
             + (active ? 'linear-gradient(135deg,#667eea,#764ba2)' : '#ccc')
-            + ';color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:3px solid white;">'
+            + ';color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:3px solid white;">'
             + num + '</div>',
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
     });
 }
 
 function createCompletedIcon(num) {
     return L.divIcon({
         className: 'custom-marker',
-        html: '<div style="width:36px;height:36px;border-radius:50%;background:#28a745;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:3px solid white;">✓</div>',
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
+        html: '<div style="width:34px;height:34px;border-radius:50%;background:#28a745;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:3px solid white;">✓</div>',
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
     });
 }
 
-// === CHARGER LE PARCOURS ===
+// ============================================================
+// === CHARGER LE PARCOURS (carte + envoi à PandaSuite) ===
+// ============================================================
 function loadParcours(data, fromAI) {
     if (typeof data === 'string') {
         try { data = JSON.parse(data); } catch(e) { return; }
     }
 
-    // Si un parcours est déjà en cours et qu'on reçoit le vrai parcours IA,
-    // on le remplace seulement si l'utilisateur n'a pas encore commencé à jouer
     if (parcoursLoaded && fromAI && score > 0) {
         console.log('[Explozill] Parcours IA ignoré car le joueur a déjà commencé');
         return;
@@ -554,14 +351,9 @@ function loadParcours(data, fromAI) {
     // Afficher le titre
     if (parcours.titre) {
         var titleEl = document.getElementById('route-title');
-        titleEl.textContent = '🦊 ' + parcours.titre;
+        titleEl.textContent = parcours.titre;
         titleEl.style.display = 'block';
     }
-
-    // Badge IA
-    var aiBadge = document.getElementById('ai-badge');
-    aiBadge.textContent = fromAI ? '✨ GÉNÉRÉ PAR IA EN DIRECT' : '✨ GÉNÉRÉ PAR IA';
-    aiBadge.style.display = 'block';
 
     // Score
     document.getElementById('score-badge').style.display = 'block';
@@ -591,8 +383,11 @@ function loadParcours(data, fromAI) {
             offset: [0, -20]
         });
 
+        // Clic sur un marqueur = envoyer l'étape à PandaSuite
         marker.on('click', function() {
-            if (i === currentStep) showPanel(i);
+            currentStep = i;
+            updateEtapeInfo(i);
+            sendEtapeToPandaSuite(i);
         });
 
         markers.push(marker);
@@ -611,267 +406,183 @@ function loadParcours(data, fromAI) {
     // Centrer la carte
     map.fitBounds(L.latLngBounds(latlngs).pad(0.3));
 
-    // Bouton première étape
-    showNextButton();
+    // Afficher l'info de la première étape
+    updateEtapeInfo(0);
 
-    // Notifier PandaSuite
+    // ============================================================
+    // ENVOYER LE PARCOURS À PANDASUITE VIA LE BRIDGE
+    // On n'envoie PAS etape_active automatiquement ici.
+    // L'utilisateur doit cliquer sur la bulle info pour naviguer.
+    // ============================================================
     try {
-        PandaBridge.send("parcours_charge", [{
-            titre: parcours.titre,
-            nb_etapes: parcours.etapes.length
-        }]);
-    } catch(e) {}
+        // Événement 1 : Parcours complet (tout le JSON)
+        PandaBridge.send("parcours_ready", [parcours]);
+        console.log('[Explozill] → PandaBridge: parcours_ready envoyé');
+    } catch(e) {
+        console.log('[Explozill] PandaBridge non disponible, mode standalone');
+    }
 
     console.log('[Explozill] Parcours chargé:', parcours.titre, '-', markers.length, 'étapes');
 }
 
-// === AFFICHER LE PANNEAU D'ÉTAPE ===
-function showPanel(stepIndex) {
+// ============================================================
+// === ENVOYER UNE ÉTAPE À PANDASUITE ===
+// ============================================================
+function sendEtapeToPandaSuite(stepIndex) {
     var etape = parcours.etapes[stepIndex];
-    var panel = document.getElementById('panel');
+    var etapeData = {
+        ordre: etape.ordre,
+        lieu_nom: etape.lieu_nom,
+        latitude: etape.latitude,
+        longitude: etape.longitude,
+        narration_arrivee: etape.narration_arrivee,
+        narration_reussite: etape.narration_reussite,
+        narration_echec: etape.narration_echec,
+        points: etape.points,
+        type_interaction: etape.interaction.type_interaction,
+        question: etape.interaction.question || etape.interaction.consigne || '',
+        consigne: etape.interaction.consigne || etape.interaction.question || '',
+        reponses: etape.interaction.reponses || [],
+        bonne_reponse: etape.interaction.bonne_reponse || 0,
+        indice: etape.interaction.indice || '',
+        element_a_trouver: etape.interaction.element_a_trouver || '',
+        etape_num: stepIndex + 1,
+        total_etapes: parcours.etapes.length,
+        score_actuel: score,
+        titre_parcours: parcours.titre,
+        introduction: parcours.introduction || '',
+        is_last: stepIndex === parcours.etapes.length - 1
+    };
 
-    document.getElementById('panel-titre').textContent = etape.ordre + '. ' + etape.lieu_nom;
-    document.getElementById('panel-narration').textContent = etape.narration_arrivee;
-
-    var typeDiv = document.getElementById('panel-interaction-type');
-    var contentDiv = document.getElementById('panel-interaction-content');
-    var btnValider = document.getElementById('btn-valider');
-
-    stepCompleted = false;
-    btnValider.style.display = 'none';
-    document.getElementById('panel-points').textContent = '';
-
-    var interaction = etape.interaction;
-    typeDiv.textContent = (interaction.type_interaction || 'défi').toUpperCase();
-
-    switch(interaction.type_interaction) {
-        case 'quiz':
-            var html = '<p style="margin-bottom:12px;font-weight:600;">' + interaction.question + '</p>';
-            if (interaction.reponses && Array.isArray(interaction.reponses)) {
-                interaction.reponses.forEach(function(rep, i) {
-                    html += '<button class="quiz-btn" data-index="' + i + '" data-correct="' + interaction.bonne_reponse + '">' + rep + '</button>';
-                });
-            }
-            if (interaction.indice) {
-                html += '<p style="margin-top:10px;font-size:11px;color:#999;">💡 Indice : ' + interaction.indice + '</p>';
-            }
-            contentDiv.innerHTML = html;
-
-            contentDiv.querySelectorAll('.quiz-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    if (stepCompleted) return;
-                    var idx = parseInt(this.getAttribute('data-index'));
-                    var correct = parseInt(this.getAttribute('data-correct'));
-                    stepCompleted = true;
-                    if (idx === correct) {
-                        this.classList.add('correct');
-                        score += etape.points;
-                        document.getElementById('score-value').textContent = score;
-                        document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + (etape.narration_reussite || '');
-                    } else {
-                        this.classList.add('wrong');
-                        var correctBtn = contentDiv.querySelectorAll('.quiz-btn')[correct];
-                        if (correctBtn) correctBtn.classList.add('correct');
-                        document.getElementById('panel-points').textContent = etape.narration_echec || 'Pas tout à fait...';
-                    }
-                    completeStep(stepIndex);
-                });
-            });
-            break;
-
-        case 'photo':
-            contentDiv.innerHTML = '<p style="font-weight:600;">' + (interaction.consigne || 'Prenez une photo !') + '</p>'
-                + (interaction.indice ? '<p style="margin-top:10px;font-size:11px;color:#999;">💡 ' + interaction.indice + '</p>' : '');
-            btnValider.style.display = 'block';
-            btnValider.textContent = '📸 Photo prise !';
-            btnValider.onclick = function() {
-                if (stepCompleted) return;
-                stepCompleted = true;
-                score += etape.points;
-                document.getElementById('score-value').textContent = score;
-                document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + (etape.narration_reussite || '');
-                completeStep(stepIndex);
-            };
-            break;
-
-        case 'observation':
-            contentDiv.innerHTML = '<p style="font-weight:600;">' + (interaction.consigne || 'Observez bien !') + '</p>'
-                + '<input type="number" id="obs-input" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px;margin-top:10px;" placeholder="Votre réponse...">'
-                + (interaction.indice ? '<p style="margin-top:10px;font-size:11px;color:#999;">💡 ' + interaction.indice + '</p>' : '');
-            btnValider.style.display = 'block';
-            btnValider.textContent = 'Valider ma réponse';
-            btnValider.onclick = function() {
-                if (stepCompleted) return;
-                var val = parseInt(document.getElementById('obs-input').value);
-                var correct = interaction.bonne_reponse;
-                var marge = interaction.marge_erreur || 0;
-                stepCompleted = true;
-                if (Math.abs(val - correct) <= marge) {
-                    score += etape.points;
-                    document.getElementById('score-value').textContent = score;
-                    document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + (etape.narration_reussite || '');
-                } else {
-                    document.getElementById('panel-points').textContent = etape.narration_echec || 'Pas tout à fait...';
-                }
-                completeStep(stepIndex);
-            };
-            break;
-
-        case 'code':
-            contentDiv.innerHTML = '<p style="font-weight:600;">' + (interaction.consigne || 'Trouvez le code !') + '</p>'
-                + '<input type="text" id="code-input" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px;margin-top:10px;" placeholder="Entrez le code...">'
-                + (interaction.indice ? '<p style="margin-top:10px;font-size:11px;color:#999;">💡 ' + interaction.indice + '</p>' : '');
-            btnValider.style.display = 'block';
-            btnValider.textContent = 'Valider le code';
-            btnValider.onclick = function() {
-                if (stepCompleted) return;
-                var val = document.getElementById('code-input').value.trim().toUpperCase();
-                var correct = String(interaction.bonne_reponse).toUpperCase().replace(/-/g, '');
-                stepCompleted = true;
-                if (val.replace(/-/g, '') === correct) {
-                    score += etape.points;
-                    document.getElementById('score-value').textContent = score;
-                    document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + (etape.narration_reussite || '');
-                } else {
-                    document.getElementById('panel-points').textContent = etape.narration_echec || 'Pas tout à fait...';
-                }
-                completeStep(stepIndex);
-            };
-            break;
-
-        default:
-            contentDiv.innerHTML = '<p style="font-weight:600;">' + (interaction.consigne || interaction.question || 'Réalisez le défi !') + '</p>'
-                + (interaction.indice ? '<p style="margin-top:10px;font-size:11px;color:#999;">💡 ' + interaction.indice + '</p>' : '');
-            btnValider.style.display = 'block';
-            btnValider.textContent = 'Défi réalisé ✓';
-            btnValider.onclick = function() {
-                if (stepCompleted) return;
-                stepCompleted = true;
-                score += etape.points;
-                document.getElementById('score-value').textContent = score;
-                document.getElementById('panel-points').textContent = '🎉 +' + etape.points + ' pts ! ' + (etape.narration_reussite || '');
-                completeStep(stepIndex);
-            };
+    try {
+        PandaBridge.send("etape_active", [etapeData]);
+        console.log('[Explozill] → PandaBridge: etape_active envoyé - Étape', stepIndex + 1, etape.lieu_nom);
+    } catch(e) {
+        console.log('[Explozill] PandaBridge non disponible');
     }
 
-    panel.classList.add('visible');
-    document.getElementById('btn-next').style.display = 'none';
-}
+    // Centrer la carte sur l'étape
+    map.flyTo([etape.latitude, etape.longitude], 16, { duration: 1.5 });
 
-// === COMPLÉTER UNE ÉTAPE ===
-function completeStep(stepIndex) {
-    markers[stepIndex].setIcon(createCompletedIcon(stepIndex + 1));
-    try {
-        PandaBridge.send("etape_complete", [{
-            etape: stepIndex + 1,
-            lieu: parcours.etapes[stepIndex].lieu_nom,
-            score: score,
-            total_etapes: parcours.etapes.length
-        }]);
-    } catch(e) {}
-
-    setTimeout(function() {
-        if (stepIndex < parcours.etapes.length - 1) {
-            currentStep = stepIndex + 1;
-            markers[currentStep].setIcon(createStepIcon(currentStep + 1, true));
-            showNextButton();
+    // Mettre à jour les icônes
+    markers.forEach(function(m, idx) {
+        if (idx < stepIndex) {
+            m.setIcon(createCompletedIcon(idx + 1));
+        } else if (idx === stepIndex) {
+            m.setIcon(createStepIcon(idx + 1, true));
         } else {
-            showConclusion();
+            m.setIcon(createStepIcon(idx + 1, false));
         }
-    }, 2000);
+    });
 }
 
-// === BOUTON ÉTAPE SUIVANTE ===
-function showNextButton() {
-    var btn = document.getElementById('btn-next');
-    btn.textContent = 'Aller à l\'étape ' + (currentStep + 1) + ' →';
-    btn.style.display = 'block';
-    btn.onclick = function() {
-        document.getElementById('panel').classList.remove('visible');
-        var etape = parcours.etapes[currentStep];
-        map.flyTo([etape.latitude, etape.longitude], 16, { duration: 1.5 });
-        setTimeout(function() { showPanel(currentStep); }, 1600);
-    };
+// === OUVRIR L'ÉTAPE DANS PANDASUITE ===
+function openEtapeInPandaSuite() {
+    console.log('[Explozill] Clic bulle → envoi etape_active pour étape', currentStep + 1);
+    sendEtapeToPandaSuite(currentStep);
 }
 
-// === CONCLUSION ===
-function showConclusion() {
-    document.getElementById('panel').classList.remove('visible');
-    document.getElementById('btn-next').style.display = 'none';
-    var maxScore = parcours.etapes.length * 100;
-    document.getElementById('conclusion-score').textContent = score + ' / ' + maxScore + ' pts';
-    document.getElementById('conclusion-text').textContent = parcours.conclusion || 'Bravo, aventurier !';
-    document.getElementById('conclusion-panel').classList.add('visible');
-    try {
-        PandaBridge.send("parcours_termine", [{
-            score: score,
-            total: maxScore,
-            titre: parcours.titre
-        }]);
-    } catch(e) {}
+// === METTRE À JOUR LA BULLE INFO EN BAS ===
+function updateEtapeInfo(stepIndex) {
+    var etape = parcours.etapes[stepIndex];
+    document.getElementById('etape-info-title').textContent = 
+        'Étape ' + (stepIndex + 1) + '/' + parcours.etapes.length + ' : ' + etape.lieu_nom;
+    document.getElementById('etape-info-subtitle').textContent = 
+        etape.interaction.type_interaction.toUpperCase() + ' — Appuyer pour voir le défi →';
+    document.getElementById('etape-info').style.display = 'block';
 }
 
-// === FERMER LE PANNEAU ===
-document.getElementById('panel-close').addEventListener('click', function() {
-    document.getElementById('panel').classList.remove('visible');
-    showNextButton();
-});
-
-// === RÉCEPTION DEPUIS PANDASUITE ===
+// ============================================================
+// === ÉCOUTER LES ÉVÉNEMENTS DE PANDASUITE ===
+// ============================================================
 try {
-    PandaBridge.listen("marker18646", function(args) {
-        if (args && args[0]) { hideLoading(); loadParcours(args[0], true); return; }
-        PandaBridge.getProperties(function(props) {
-            if (props && props.parcours_genere) { hideLoading(); loadParcours(props.parcours_genere, true); }
-        });
+    // PandaSuite envoie "etape_reponse" quand l'utilisateur a répondu
+    PandaBridge.listen("etape_reponse", function(args) {
+        var data = args && args[0] ? args[0] : args;
+        console.log('[Explozill] ← PandaBridge: etape_reponse reçu', data);
+        
+        if (data) {
+            if (data.points_gagnes) {
+                score += parseInt(data.points_gagnes);
+                document.getElementById('score-value').textContent = score;
+            }
+
+            var stepIdx = (parseInt(data.etape_num) || currentStep + 1) - 1;
+            if (stepIdx >= 0 && stepIdx < markers.length) {
+                markers[stepIdx].setIcon(createCompletedIcon(stepIdx + 1));
+            }
+
+            if (data.next || data.etape_suivante) {
+                var nextStep = stepIdx + 1;
+                if (nextStep < parcours.etapes.length) {
+                    currentStep = nextStep;
+                    updateEtapeInfo(nextStep);
+                    sendEtapeToPandaSuite(nextStep);
+                } else {
+                    showConclusionOnMap();
+                }
+            }
+        }
     });
-    PandaBridge.listen('props', function(props) {
-        if (props && props.parcours_genere) { hideLoading(); loadParcours(props.parcours_genere, true); }
+
+    // PandaSuite peut demander d'aller à une étape spécifique
+    PandaBridge.listen("aller_etape", function(args) {
+        var data = args && args[0] ? args[0] : args;
+        var stepIdx = (parseInt(data.etape_num || data) || 1) - 1;
+        if (stepIdx >= 0 && stepIdx < parcours.etapes.length) {
+            currentStep = stepIdx;
+            updateEtapeInfo(stepIdx);
+            sendEtapeToPandaSuite(stepIdx);
+        }
     });
+
+    // PandaSuite peut demander le parcours complet
+    PandaBridge.listen("demander_parcours", function() {
+        if (parcours) {
+            PandaBridge.send("parcours_ready", [parcours]);
+        }
+    });
+
 } catch(e) {
     console.log('[Explozill] PandaBridge non disponible');
 }
 
-// === DÉMARRAGE ===
-var webhookReceived = false;
+// === CONCLUSION SUR LA CARTE ===
+function showConclusionOnMap() {
+    document.getElementById('etape-info').style.display = 'none';
+    var maxScore = parcours.etapes.length * 100;
 
+    try {
+        PandaBridge.send("parcours_termine", [{
+            score: score,
+            total: maxScore,
+            titre: parcours.titre,
+            conclusion: parcours.conclusion || 'Bravo, aventurier !'
+        }]);
+        console.log('[Explozill] → PandaBridge: parcours_termine envoyé');
+    } catch(e) {}
+
+    var latlngs = parcours.etapes.map(function(e) { return [e.latitude, e.longitude]; });
+    map.fitBounds(L.latLngBounds(latlngs).pad(0.3));
+}
+
+// === DÉMARRAGE ===
 (function() {
-    console.log('[Explozill] Démarrage...');
+    console.log('[Explozill] Démarrage carte...');
     
-    // Étape 1 : Afficher l'écran de chargement
-    updateLoadingStatus('Connexion à l\'IA...');
-    
-    // Messages de progression pendant l'attente
-    var loadingMessages = [
-        { time: 3000, msg: 'Recherche des lieux...' },
-        { time: 8000, msg: 'Génération du parcours...' },
-        { time: 15000, msg: 'Création des défis...' },
-        { time: 25000, msg: 'Finalisation...' }
-    ];
-    var loadingTimers = loadingMessages.map(function(m) {
-        return setTimeout(function() {
-            if (!webhookReceived) updateLoadingStatus(m.msg);
-        }, m.time);
-    });
-    
-    // Timeout de sécurité : si le webhook ne répond pas après 45s,
-    // charger le parcours démo
+    // Timeout de sécurité : si le webhook ne répond pas après 45s, parcours démo
+    var webhookReceived = false;
     var fallbackTimer = setTimeout(function() {
         if (!webhookReceived) {
             console.log('[Explozill] Timeout webhook, chargement parcours démo');
-            updateLoadingStatus('Parcours prêt !');
-            setTimeout(function() {
-                loadParcours(DEMO_PARCOURS, false);
-                hideLoading();
-            }, 500);
+            try { PandaBridge.send("loading_status", [{ status: "Mode démo" }]); } catch(e) {}
+            loadParcours(DEMO_PARCOURS, false);
         }
     }, 45000);
     
     // Appeler le webhook Make.com
     callWebhook(function onSuccess() {
-        // Annuler les timers de fallback
         webhookReceived = true;
-        loadingTimers.forEach(function(t) { clearTimeout(t); });
         clearTimeout(fallbackTimer);
     });
 })();
