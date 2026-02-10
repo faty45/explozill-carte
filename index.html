@@ -38,6 +38,16 @@
             text-overflow: ellipsis;
         }
 
+        /* Badge IA */
+        #ai-badge {
+            position: fixed; top: 42px; left: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; padding: 3px 10px;
+            border-radius: 8px; z-index: 1000;
+            font-size: 10px; font-weight: 600;
+            display: none;
+        }
+
         /* Info bulle étape active */
         #etape-info {
             position: fixed; bottom: 15px; left: 15px; right: 15px;
@@ -67,7 +77,8 @@
 
 <div id="map"></div>
 <div id="route-title"></div>
-<div id="score-badge">Score : <span id="score-value">0</span> pts</div>
+<div id="ai-badge">✨ GÉNÉRÉ PAR IA EN DIRECT</div>
+<div id="score-badge">🐾 Score : <span id="score-value">0</span> pts</div>
 
 <!-- Info bulle en bas : indique l'étape active, clic = envoie à PandaSuite -->
 <div id="etape-info" onclick="openEtapeInPandaSuite()">
@@ -80,10 +91,44 @@
 // ============================================================
 // EXPLOZILL - CARTE INTERACTIVE
 // Version: Démo CCI37 Tours - 10 février 2026
-// Mode: Carte GPS + envoi données vers PandaSuite via Bridge
-// PAS de loading screen (PandaSuite gère l'écran de chargement)
-// PAS de renard (Moonsky est dans PandaSuite)
+// SOLUTION MARKERS : utilise PandaBridge.send("marker74226", [...])
+// au lieu de events custom pour compatibilité mode En Ligne
 // ============================================================
+
+// === BRIDGE PANDASUITE AVEC FILE D'ATTENTE ===
+var bridgeReady = false;
+var bridgeQueue = [];
+
+// Initialiser le Bridge avec callback
+try {
+    PandaBridge.init(function() {
+        bridgeReady = true;
+        console.log('[Explozill] PandaBridge READY !');
+        // Vider la file d'attente
+        while (bridgeQueue.length) {
+            var item = bridgeQueue.shift();
+            PandaBridge.send(item.name, item.payload);
+            console.log('[Explozill] Queue flush:', item.name);
+        }
+    });
+} catch(e) {
+    console.log('[Explozill] PandaBridge.init non disponible, mode standalone');
+}
+
+// Fonction d'envoi sécurisée avec file d'attente
+function sendPS(name, payload) {
+    if (bridgeReady) {
+        try {
+            PandaBridge.send(name, payload);
+            console.log('[Explozill] → PandaBridge.send:', name);
+        } catch(e) {
+            console.log('[Explozill] Erreur PandaBridge.send:', name, e);
+        }
+    } else {
+        bridgeQueue.push({ name: name, payload: payload });
+        console.log('[Explozill] → Queue (bridge pas prêt):', name);
+    }
+}
 
 // === CONFIGURATION ===
 var WEBHOOK_URL = 'https://hook.eu2.make.com/sazwwf4twy6hcfu3qckrqrl4v7hubdbl';
@@ -212,7 +257,7 @@ function callWebhook(onSuccess) {
     console.log('[Explozill] Appel webhook:', url);
 
     // Informer PandaSuite que le chargement commence
-    try { PandaBridge.send("loading_start", [{ status: "Connexion à l'IA..." }]); } catch(e) {}
+    sendPS("loading_start", [{ status: "Connexion à l'IA..." }]);
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -225,7 +270,7 @@ function callWebhook(onSuccess) {
                 var routeData = parseRouteData(xhr.responseText);
                 if (routeData && routeData.etapes && routeData.etapes.length > 0) {
                     console.log('[Explozill] Parcours IA reçu:', routeData.titre, '-', routeData.etapes.length, 'étapes');
-                    try { PandaBridge.send("loading_status", [{ status: "Parcours prêt !" }]); } catch(e) {}
+                    sendPS("loading_status", [{ status: "Parcours prêt !" }]);
                     if (onSuccess) onSuccess();
                     loadParcours(routeData, true);
                     return;
@@ -239,12 +284,12 @@ function callWebhook(onSuccess) {
 
     xhr.onerror = function() {
         console.log('[Explozill] Webhook injoignable');
-        try { PandaBridge.send("loading_status", [{ status: "Mode démo" }]); } catch(e) {}
+        sendPS("loading_status", [{ status: "Mode démo" }]);
     };
 
     xhr.ontimeout = function() {
         console.log('[Explozill] Webhook timeout');
-        try { PandaBridge.send("loading_status", [{ status: "Mode démo" }]); } catch(e) {}
+        sendPS("loading_status", [{ status: "Mode démo" }]);
     };
 
     xhr.send();
@@ -255,7 +300,6 @@ function parseRouteData(rawData) {
     if (typeof rawData === 'object' && rawData !== null) return normalizeRouteData(rawData);
     if (typeof rawData === 'string') {
         var str = rawData.trim()
-            .replace(/```json\s*/g, '').replace(/```\s*/g, '')
             .replace(/\s*du module OpenAI.*$/s, '')
             .replace(/\s*du module ChatGPT.*$/s, '');
         try { return normalizeRouteData(JSON.parse(str)); } catch(e) {}
@@ -351,12 +395,15 @@ function loadParcours(data, fromAI) {
     // Afficher le titre
     if (parcours.titre) {
         var titleEl = document.getElementById('route-title');
-        titleEl.textContent = parcours.titre;
+        titleEl.textContent = '🐾 ' + parcours.titre;
         titleEl.style.display = 'block';
     }
 
-    // Score
+    // Score + badge IA
     document.getElementById('score-badge').style.display = 'block';
+    if (fromAI) {
+        document.getElementById('ai-badge').style.display = 'block';
+    }
 
     // Supprimer anciens marqueurs
     markers.forEach(function(m) { map.removeLayer(m); });
@@ -383,11 +430,10 @@ function loadParcours(data, fromAI) {
             offset: [0, -20]
         });
 
-        // Clic sur un marqueur = envoyer l'étape à PandaSuite
+        // Clic sur un marqueur = mettre à jour la bulle info
         marker.on('click', function() {
             currentStep = i;
             updateEtapeInfo(i);
-            sendEtapeToPandaSuite(i);
         });
 
         markers.push(marker);
@@ -409,24 +455,15 @@ function loadParcours(data, fromAI) {
     // Afficher l'info de la première étape
     updateEtapeInfo(0);
 
-    // ============================================================
-    // ENVOYER LE PARCOURS À PANDASUITE VIA LE BRIDGE
-    // On n'envoie PAS etape_active automatiquement ici.
-    // L'utilisateur doit cliquer sur la bulle info pour naviguer.
-    // ============================================================
-    try {
-        // Événement 1 : Parcours complet (tout le JSON)
-        PandaBridge.send("parcours_ready", [parcours]);
-        console.log('[Explozill] → PandaBridge: parcours_ready envoyé');
-    } catch(e) {
-        console.log('[Explozill] PandaBridge non disponible, mode standalone');
-    }
+    // Envoyer parcours_ready via MARKER (pas event custom)
+    sendPS("parcours_ready", [parcours]);
 
     console.log('[Explozill] Parcours chargé:', parcours.titre, '-', markers.length, 'étapes');
 }
 
 // ============================================================
-// === ENVOYER UNE ÉTAPE À PANDASUITE ===
+// === ENVOYER UNE ÉTAPE À PANDASUITE VIA MARKER ===
+// Utilise marker74226 pour compatibilité mode En Ligne
 // ============================================================
 function sendEtapeToPandaSuite(stepIndex) {
     var etape = parcours.etapes[stepIndex];
@@ -454,12 +491,14 @@ function sendEtapeToPandaSuite(stepIndex) {
         is_last: stepIndex === parcours.etapes.length - 1
     };
 
-    try {
-        PandaBridge.send("etape_active", [etapeData]);
-        console.log('[Explozill] → PandaBridge: etape_active envoyé - Étape', stepIndex + 1, etape.lieu_nom);
-    } catch(e) {
-        console.log('[Explozill] PandaBridge non disponible');
-    }
+    // ============================================================
+    // ENVOYER VIA MARKER74226 (fonctionne en mode En Ligne !)
+    // ET aussi via etape_active (au cas où mode Fichier)
+    // ============================================================
+    sendPS("marker74226", [etapeData]);
+    sendPS("etape_active", [etapeData]);
+
+    console.log('[Explozill] → Marker + Event envoyés - Étape', stepIndex + 1, etape.lieu_nom);
 
     // Centrer la carte sur l'étape
     map.flyTo([etape.latitude, etape.longitude], 16, { duration: 1.5 });
@@ -478,7 +517,7 @@ function sendEtapeToPandaSuite(stepIndex) {
 
 // === OUVRIR L'ÉTAPE DANS PANDASUITE ===
 function openEtapeInPandaSuite() {
-    console.log('[Explozill] Clic bulle → envoi etape_active pour étape', currentStep + 1);
+    console.log('[Explozill] Clic bulle → envoi marker74226 pour étape', currentStep + 1);
     sendEtapeToPandaSuite(currentStep);
 }
 
@@ -539,7 +578,7 @@ try {
     // PandaSuite peut demander le parcours complet
     PandaBridge.listen("demander_parcours", function() {
         if (parcours) {
-            PandaBridge.send("parcours_ready", [parcours]);
+            sendPS("parcours_ready", [parcours]);
         }
     });
 
@@ -552,15 +591,12 @@ function showConclusionOnMap() {
     document.getElementById('etape-info').style.display = 'none';
     var maxScore = parcours.etapes.length * 100;
 
-    try {
-        PandaBridge.send("parcours_termine", [{
-            score: score,
-            total: maxScore,
-            titre: parcours.titre,
-            conclusion: parcours.conclusion || 'Bravo, aventurier !'
-        }]);
-        console.log('[Explozill] → PandaBridge: parcours_termine envoyé');
-    } catch(e) {}
+    sendPS("parcours_termine", [{
+        score: score,
+        total: maxScore,
+        titre: parcours.titre,
+        conclusion: parcours.conclusion || 'Bravo, aventurier !'
+    }]);
 
     var latlngs = parcours.etapes.map(function(e) { return [e.latitude, e.longitude]; });
     map.fitBounds(L.latLngBounds(latlngs).pad(0.3));
@@ -568,14 +604,14 @@ function showConclusionOnMap() {
 
 // === DÉMARRAGE ===
 (function() {
-    console.log('[Explozill] Démarrage carte...');
+    console.log('[Explozill] Démarrage carte v3 (Markers + Init)...');
     
     // Timeout de sécurité : si le webhook ne répond pas après 45s, parcours démo
     var webhookReceived = false;
     var fallbackTimer = setTimeout(function() {
         if (!webhookReceived) {
             console.log('[Explozill] Timeout webhook, chargement parcours démo');
-            try { PandaBridge.send("loading_status", [{ status: "Mode démo" }]); } catch(e) {}
+            sendPS("loading_status", [{ status: "Mode démo" }]);
             loadParcours(DEMO_PARCOURS, false);
         }
     }, 45000);
