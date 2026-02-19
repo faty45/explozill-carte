@@ -1,191 +1,40 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Explozill - Carte</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pandasuite-bridge/lib/pandasuite-bridge.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-        *{margin:0;padding:0;box-sizing:border-box}
-        html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',-apple-system,sans-serif}
-        #map{width:100%;height:100%;z-index:1}
-
-        /* ===== LOADING SCREEN ===== */
-        #loading-screen{
-            position:fixed;top:0;left:0;right:0;bottom:0;z-index:3000;
-            background:url('https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/JktACOUBoaXaVrwt.jpg') center/cover no-repeat;
-            display:flex;flex-direction:column;align-items:center;justify-content:center;
-            padding:32px 24px;text-align:center;color:#fff;
-            transition:opacity .8s ease
+{
+  "version": "1.0.0",
+  "main": "index.html",
+  "properties": [
+    {
+      "id": "latitude",
+      "name": "Latitude",
+      "type": "Number",
+      "value": 47.3942,
+      "bindable": true
+    },
+    {
+      "id": "longitude",
+      "name": "Longitude",
+      "type": "Number",
+      "value": 0.6885,
+      "bindable": true
+    },
+    {
+      "id": "ville",
+      "name": "Ville",
+      "type": "String",
+      "value": "Tours",
+      "bindable": true
+    }
+  ],
+  "actions": [
+    {
+      "id": "loadParcours",
+      "name": "Charger le parcours",
+      "params": [
+        {
+          "id": "parcours_json",
+          "name": "JSON du parcours",
+          "type": "String"
         }
-        #loading-screen::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,.35)}
-        #loading-screen>*{position:relative;z-index:1}
-        #loading-screen.hide{opacity:0;pointer-events:none}
-        .ld-moonsky{width:160px;height:160px;object-fit:contain;filter:drop-shadow(0 0 30px rgba(102,126,234,.6));animation:moonFloat 3s ease-in-out infinite}
-        @keyframes moonFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.03)}}
-        .ld-title{font-size:24px;font-weight:900;margin-top:24px;margin-bottom:4px;text-shadow:0 2px 20px rgba(0,0,0,.5)}
-        .ld-city{font-size:16px;font-weight:700;opacity:.7;margin-bottom:28px;text-shadow:0 1px 8px rgba(0,0,0,.4)}
-        .ld-bubble{background:rgba(255,255,255,.1);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:16px 24px;font-size:17px;font-weight:700;color:#fff;max-width:330px;min-height:65px;margin-bottom:28px}
-        .ld-dots span{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.4);animation:dotPulse 1.4s infinite; display:inline-block; margin:0 6px}
-        @keyframes dotPulse{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1.2);opacity:1}}
-
-        /* UI BADGES & NAV */
-        #score-badge{position:fixed;top:14px;right:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:10px 18px;border-radius:22px;z-index:1000;font-size:16px;font-weight:800;display:none}
-        #route-title{position:fixed;top:14px;left:14px;right:120px;background:rgba(255,255,255,.95);padding:10px 18px;border-radius:14px;z-index:1000;font-size:15px;font-weight:800;color:#1a1a2e;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        #bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);padding:8px 0;z-index:998;display:none}
-        .nav-items{display:flex;justify-content:space-around}
-        .nav-item{display:flex;flex-direction:column;align-items:center;opacity:.5}
-        .nav-item.active{opacity:1}
-        
-        /* OVERLAYS */
-        #overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2000;display:none;flex-direction:column;overflow-y:auto}
-        .scr{min-height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;text-align:center;color:#fff;position:relative}
-        .scr::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,.55);z-index:1}
-        .scr>*{position:relative;z-index:2}
-        .scr.off{display:none}
-        .scr-bg{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;z-index:0}
-
-        /* MOONSKY BUBBLES */
-        .mk-row{display:flex;align-items:flex-end;gap:0;width:100%;max-width:360px;margin-bottom:20px}
-        .mk-img{width:100px;height:100px;filter:drop-shadow(0 0 20px rgba(102,126,234,.5))}
-        .mk-bubble{background:rgba(255,255,255,.12);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:16px 20px;font-size:17px;font-weight:600;color:#fff;flex:1}
-
-        /* BUTTONS */
-        .btn-p{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;padding:17px 50px;border-radius:36px;font-size:18px;font-weight:800;cursor:pointer}
-        .q-btn{display:block;width:100%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);color:#fff;padding:16px 22px;border-radius:18px;margin-bottom:14px;text-align:left}
-        .q-btn.ok{background:rgba(40,167,69,.4);border-color:#28a745}
-        .q-btn.ko{background:rgba(220,53,69,.4);border-color:#dc3545}
-    </style>
-</head>
-<body>
-
-<div id="loading-screen">
-    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/pwPvPthSItnrIyBy.png" class="ld-moonsky" alt="Moonsky"/>
-    <div class="ld-title">Moonsky prépare ton aventure...</div>
-    <div class="ld-city" id="ld-city">Localisation en cours...</div>
-    <div class="ld-bubble" id="ld-bubble"></div>
-    <div class="ld-dots"><span></span><span></span><span></span></div>
-</div>
-
-<div id="map"></div>
-<div id="route-title"></div>
-<div id="score-badge"><i class="fa-solid fa-paw"></i> <span id="score-value">0</span> pts</div>
-
-<div id="overlay">
-    <div id="scr-intro" class="scr">
-        <div class="scr-bg" id="intro-bg"></div>
-        <div class="lieu" id="intro-lieu"></div>
-        <div class="mk-row">
-            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663030501819/pwPvPthSItnrIyBy.png" class="mk-img" alt="Moonsky"/>
-            <div class="mk-bubble" id="intro-bubble"></div>
-        </div>
-        <button class="btn-p" onclick="showDefi()">Lancer le défi</button>
-    </div>
-    <div id="scr-quiz" class="scr off"><div class="q-question" id="quiz-q"></div><div class="q-answers" id="quiz-a"></div></div>
-    <div id="scr-result" class="scr off"><div class="r-title" id="r-title"></div><div class="mk-bubble" id="r-bubble"></div><button class="btn-p" id="btn-next" onclick="nextStep()">Etape suivante</button></div>
-</div>
-
-<script>
-var map, markers=[], polyline, parcours=null, step=0, score=0, voiceOn=true;
-var ELEVENLABS_KEY='sk_4784ea31bef32f99e800809c55c5e3ddf5c5602f2a3f0797';
-var ELEVENLABS_VOICE='IKne3meq5aSn9XLyUdCD';
-
-// INITIALISATION CARTE
-map=L.map('map',{zoomControl:false});
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-// CONNEXION PANDASUITE (DYNAMIQUE)
-PandaBridge.init(function() {
-    PandaBridge.onLoad(function(data) {
-        var props = data.properties || {};
-        if (props.latitude && props.longitude) {
-            map.setView([props.latitude, props.longitude], 16);
-            document.getElementById('ld-city').textContent = props.ville || "Ta position";
-        } else {
-            map.setView([47.3942, 0.6885], 16); // Tours
-        }
-        startLoading();
-    });
-
-    PandaBridge.listen('loadParcours', function(data) {
-        if (data && data.parcours_json) {
-            hideLoading();
-            load(data.parcours_json, true);
-        }
-    });
-});
-
-// LOGIQUE DE JEU
-function load(data,ai){
-    if(typeof data==='string'){try{data=JSON.parse(data)}catch(e){return}}
-    parcours=data; step=0; score=0;
-    document.getElementById('score-badge').style.display='block';
-    document.getElementById('route-title').textContent = parcours.titre;
-    document.getElementById('route-title').style.display='block';
-    markers.forEach(m => map.removeLayer(m));
-    var pts = [];
-    parcours.etapes.forEach((e,i) => {
-        var p = [e.latitude, e.longitude]; pts.push(p);
-        var m = L.marker(p).addTo(map).on('click', () => { step=i; openEtape(); });
-        markers.push(m);
-    });
-    map.fitBounds(L.latLngBounds(pts).pad(0.1));
+      ]
+    }
+  ]
 }
-
-function openEtape(){
-    var e = parcours.etapes[step];
-    document.getElementById('intro-lieu').textContent = e.lieu_nom;
-    document.getElementById('overlay').style.display = 'flex';
-    speak('intro-bubble', e.narration_arrivee);
-}
-
-function showDefi(){
-    var e = parcours.etapes[step];
-    document.getElementById('scr-intro').classList.add('off');
-    document.getElementById('scr-quiz').classList.remove('off');
-    document.getElementById('quiz-q').textContent = e.interaction.question;
-    var ad = document.getElementById('quiz-a'); ad.innerHTML='';
-    e.interaction.reponses.forEach((r,idx) => {
-        var b = document.createElement('button'); b.className='q-btn'; b.textContent=r;
-        b.onclick = () => { if(idx===e.interaction.bonne_reponse) result(true,e); else result(false,e); };
-        ad.appendChild(b);
-    });
-}
-
-function result(ok,e){
-    document.getElementById('scr-quiz').classList.add('off');
-    document.getElementById('scr-result').classList.remove('off');
-    document.getElementById('r-title').textContent = ok ? "Bravo !" : "Oups...";
-    speak('r-bubble', ok ? e.narration_reussite : e.narration_echec);
-    if(ok) { score += 100; document.getElementById('score-value').textContent = score; }
-}
-
-function nextStep(){
-    step++; document.getElementById('overlay').style.display='none';
-    if(step < parcours.etapes.length) map.flyTo([parcours.etapes[step].latitude, parcours.etapes[step].longitude], 17);
-}
-
-// UTILS (TTS & LOADING)
-function speak(id, txt){
-    var el = document.getElementById(id); el.textContent = '';
-    var i=0; var t = setInterval(()=>{ if(i<txt.length){el.textContent+=txt[i]; i++} else clearInterval(t)}, 30);
-    // TTS ElevenLabs
-    fetch('https://api.elevenlabs.io/v1/text-to-speech/'+ELEVENLABS_VOICE,{
-        method:'POST', headers:{'xi-api-key':ELEVENLABS_KEY,'Content-Type':'application/json'},
-        body:JSON.stringify({text:txt,model_id:'eleven_multilingual_v2'})
-    }).then(r=>r.blob()).then(b=>{ var u=URL.createObjectURL(b); new Audio(u).play()});
-}
-
-var LD_PHRASES=["Je prépare tes énigmes...","Je vérifie les spots...","Moonsky arrive !"];
-function startLoading(){
-    var i=0; setInterval(()=>{ document.getElementById('ld-bubble').textContent = LD_PHRASES[i%3]; i++ }, 3000);
-}
-function hideLoading(){ document.getElementById('loading-screen').classList.add('hide'); }
-
-</script>
-</body>
-</html>
